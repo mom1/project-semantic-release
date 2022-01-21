@@ -16,4 +16,8 @@ git config --global user.name "github-actions"
 git config --global user.email "action@github.com"
 
 # Run Semantic Release
-semantic-release publish "$RETRY" -v DEBUG -D commit_author="github-actions <action@github.com>"
+if [[ -z "$RETRY" ]]; then
+    semantic-release publish -v DEBUG -D commit_author="github-actions <action@github.com>"
+else
+    semantic-release publish "$RETRY" -v DEBUG -D commit_author="github-actions <action@github.com>"
+fi
