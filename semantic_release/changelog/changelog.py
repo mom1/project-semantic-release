@@ -8,8 +8,6 @@ from ..history import get_new_version
 from ..history.logs import evaluate_version_bump
 from ..hvcs import Github, Gitlab
 from ..settings import config
-from ..vcs_helpers import get_formatted_tag, repo
-from . import handlers
 from .compare import compare_url
 
 
@@ -99,6 +97,8 @@ def changelog_template(
         import chevron
     except ImportError:
         raise ImproperConfigurationError("Install `chevron` for use 'changelog_template' component")
+    from ..vcs_helpers import get_formatted_tag, repo
+    from . import handlers
 
     last_release = previous_version or version
     last_git_tag = get_formatted_tag(last_release)

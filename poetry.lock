@@ -280,7 +280,7 @@ python-versions = "*"
 name = "invoke"
 version = "1.6.0"
 description = "Pythonic task execution"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -871,7 +871,7 @@ emoji = ["emoji"]
 [metadata]
 lock-version = "1.1"
 python-versions = "~3.7 || ~3.8 || ~3.9"
-content-hash = "05486c711d0ad75c0ab6dec9243dea2475a7180f64dc1b18143975246639defd"
+content-hash = "d97a049a28deee234a034c608998cc74b793c357993775be28f9f4b61f6089da"
 
 [metadata.files]
 atomicwrites = [
