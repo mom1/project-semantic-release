@@ -3,7 +3,7 @@ name: Test & Release
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   test:
@@ -125,8 +125,8 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ needs.beautify.outputs.new_sha }}
-      - name: Fetch master
-        run: git fetch --prune origin +refs/heads/master:refs/remotes/origin/master
+      - name: Fetch main
+        run: git fetch --prune origin +refs/heads/main:refs/remotes/origin/main
       - name: Python Semantic Release
         uses: ./
         with:
