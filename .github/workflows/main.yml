@@ -100,7 +100,7 @@ jobs:
           poetry run isort .
 
       - name: Commit and push changes
-        uses: github-actions-x/commit@v2.5
+        uses: github-actions-x/commit@v2.8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: 'style: beautify ${{ github.sha }}'
