@@ -7,3 +7,6 @@ htmlcov
 .mypy_cache
 .pytest_cache
 .tox
+htmlcov
+.coverage
+.github

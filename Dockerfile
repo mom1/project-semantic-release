@@ -2,6 +2,8 @@
 FROM python:3.9.9-slim-buster
 
 ENV PATH="$PATH:/root/.local/bin" \
+  # build:
+  BUILD_ONLY_PACKAGES='wget curl' \
   # python:
   PYTHONFAULTHANDLER=1 \
   PYTHONUNBUFFERED=1 \
@@ -11,18 +13,37 @@ ENV PATH="$PATH:/root/.local/bin" \
   PIP_NO_CACHE_DIR=off \
   PIP_DISABLE_PIP_VERSION_CHECK=on \
   PIP_DEFAULT_TIMEOUT=100 \
+  # tini:
+  TINI_VERSION=v0.19.0 \
   # poetry:
   POETRY_VERSION=1.1.11 \
   POETRY_NO_INTERACTION=1 \
   POETRY_VIRTUALENVS_CREATE=false \
   POETRY_CACHE_DIR='/var/cache/pypoetry'
 
-RUN curl -sSL 'https://install.python-poetry.org' | python - \
-  && poetry --version
+# System deps:
+RUN apt-get update && apt-get upgrade -y \
+  && apt-get install --no-install-recommends -y \
+  git \
+  # Defining build-time-only dependencies:
+  $BUILD_ONLY_PACKAGES \
+  # Installing `tini` utility:
+  # https://github.com/krallin/tini
+  && wget -O /usr/local/bin/tini "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini" \
+  && chmod +x /usr/local/bin/tini && tini --version \
+  # Installing `poetry` package manager:
+  # https://github.com/python-poetry/poetry
+  && curl -sSL 'https://install.python-poetry.org' | python - \
+  && poetry --version \
+  # Removing build-time-only dependencies:
+  && apt-get remove -y $BUILD_ONLY_PACKAGES \
+  # Cleaning cache:
+  && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
+  && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /semantic-release
 
-COPY ./poetry.lock ./pyproject.toml /semantic-release/
+COPY . /semantic-release
 
 RUN poetry install --no-dev -E emoji --no-interaction --no-ansi \
   # Upgrading pip, it is insecure, remove after `pip@21.1`
@@ -30,7 +51,6 @@ RUN poetry install --no-dev -E emoji --no-interaction --no-ansi \
   # Cleaning poetry installation's cache for production:
   && rm -rf "$POETRY_CACHE_DIR"
 
-COPY . /semantic-release
-RUN poetry run semantic_release.cli --help
+RUN semantic-release --help
 
-ENTRYPOINT ["/semantic-release/action.sh"]
+ENTRYPOINT ["tini", "--", "/semantic-release/action.sh"]
