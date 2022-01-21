@@ -18,7 +18,6 @@ from .errors import GitError, HvcsRepoParseError
 from .helpers import LoggedFunction
 from .settings import config
 
-
 try:
     repo = Repo(".", search_parent_directories=True)
 except InvalidGitRepositoryError:
