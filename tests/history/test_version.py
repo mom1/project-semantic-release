@@ -89,7 +89,7 @@ class TestGetNewVersion:
 
 @mock.patch(
     "semantic_release.history.config.get",
-    wrapped_config_get(version_variable="my_version_path:my_version_var"),
+    wrapped_config_get(version_variable="my_version_path:my_version_var", version_toml=""),
 )
 def test_set_version(tmp_cwd):
     path = tmp_cwd / "my_version_path"
