@@ -1,0 +1,25 @@
+name: 'Python Semantic Release'
+
+description: 'Automatic Semantic Versioning for Python projects'
+
+inputs:
+  directory:
+    description: 'Sub-directory to cd into before running semantic-release'
+    default: '.'
+    required: false
+  github_token:
+    description: 'GitHub token used to push release notes and new commits/tags'
+    required: true
+  pypi_token:
+    description: 'PyPI API token'
+    required: false
+  repository_username:
+    description: 'Username with project access to push to Artifact Repository'
+    required: false
+  repository_password:
+    description: 'Password or token to the account specified in repository_username'
+    required: false
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
