@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      retry:
+        description: 'Retry the same release, do not bump.'
+        required: false
+        default: ''
 
 jobs:
   test:
@@ -129,6 +135,8 @@ jobs:
         run: git fetch --prune origin +refs/heads/main:refs/remotes/origin/main
       - name: Python Semantic Release
         uses: ./
+        env:
+          RETRY: ${{ github.event.inputs.retry }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           repository_username: ${{ secrets.PYPI_USERNAME }}
