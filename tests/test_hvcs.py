@@ -3,7 +3,7 @@ import json
 import os
 import platform
 from tempfile import NamedTemporaryFile
-from unittest import TestCase, mock
+from unittest import TestCase
 
 import pytest
 import responses
@@ -143,18 +143,13 @@ def test_get_domain_should_have_expected_domain(
     with mock.patch(
         "semantic_release.hvcs.config.get",
         wrapped_config_get(hvcs_domain=hvcs_domain, hvcs=hvcs, hvcs_api_domain=hvcs_api_domain),
+    ), mock.patch(
+        "os.environ",
+        {"GL_TOKEN": "token", "GH_TOKEN": "token", "CI_SERVER_HOST": ci_server_host},
     ):
-        with mock.patch(
-            "os.environ",
-            {
-                "GL_TOKEN": "token",
-                "GH_TOKEN": "token",
-                "CI_SERVER_HOST": ci_server_host,
-            },
-        ):
 
-            assert get_hvcs().domain() == expected_domain
-            assert get_hvcs().api_url() == api_url
+        assert get_hvcs().domain() == expected_domain
+        assert get_hvcs().api_url() == api_url
 
 
 @mock.patch("semantic_release.hvcs.config.get", wrapped_config_get(hvcs="github"))

@@ -1,4 +1,5 @@
-import mock  # noqa
+from unittest import mock  # noqa
+
 import pytest
 
 import semantic_release
@@ -7,8 +8,9 @@ import semantic_release
 @pytest.fixture(autouse=True)
 def reset_config():
     """This fixture will be used for every test here.
-    Since some tests here edit the configuration, we want to reload it.
-    We also need to reload the modules that use config.
+
+    Since some tests here edit the configuration, we want to reload it. We also need to reload the modules that use
+    config.
     """
     yield
     from importlib import reload

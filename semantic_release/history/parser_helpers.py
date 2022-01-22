@@ -1,5 +1,4 @@
-"""Commit parser helpers
-"""
+"""Commit parser helpers."""
 import collections
 import re
 from typing import List

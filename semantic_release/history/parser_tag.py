@@ -1,7 +1,6 @@
-"""Legacy commit parser from Python Semantic Release 1.0"""
+"""Legacy commit parser from Python Semantic Release 1.0."""
 import logging
 import re
-from typing import Optional
 
 from ..errors import UnknownCommitMessageStyleError
 from ..helpers import LoggedFunction
@@ -17,8 +16,7 @@ re_parser = re.compile(r"(?P<subject>[^\n]+)" r"(:?\n\n(?P<text>.+))?", re.DOTAL
 def parse_commit_message(
     message: str,
 ) -> ParsedCommit:
-    """
-    Parse a commit message according to the 1.0 version of project-semantic-release.
+    """Parse a commit message according to the 1.0 version of project-semantic-release.
 
     It expects a tag of some sort in the commit message and will use the rest of the first line
     as changelog content.
@@ -55,7 +53,7 @@ def parse_commit_message(
     if parsed.group("text"):
         descriptions = parse_paragraphs(parsed.group("text"))
     else:
-        descriptions = list()
+        descriptions = []
     descriptions.insert(0, subject.strip())
 
     # Look for descriptions of breaking changes

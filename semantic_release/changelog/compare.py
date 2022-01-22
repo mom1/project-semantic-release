@@ -6,8 +6,7 @@ from ..vcs_helpers import get_formatted_tag, get_repository_owner_and_name
 
 
 def get_github_compare_url(from_version: str, to_version: str) -> str:
-    """
-    Get the GitHub comparison link between two version tags.
+    """Get the GitHub comparison link between two version tags.
 
     :param from_version: The older version to compare.
     :param to_version: The newer version to compare.
@@ -21,8 +20,7 @@ def get_github_compare_url(from_version: str, to_version: str) -> str:
 
 
 def get_gitlab_compare_url(from_version: str, to_version: str) -> str:
-    """
-    Get the GitLab comparison link between two version tags.
+    """Get the GitLab comparison link between two version tags.
 
     :param from_version: The older version to compare.
     :param to_version: The newer version to compare.

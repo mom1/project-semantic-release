@@ -1,5 +1,4 @@
-"""CI Checks
-"""
+"""CI Checks."""
 import os
 from typing import Callable
 
@@ -7,9 +6,7 @@ from semantic_release.errors import CiVerificationError
 
 
 def checker(func: Callable) -> Callable:
-    """
-    A decorator that will convert AssertionErrors into
-    CiVerificationError.
+    """A decorator that will convert AssertionErrors into CiVerificationError.
 
     :param func: A function that will raise AssertionError
     :return: The given function wrapped to raise a CiVerificationError on AssertionError
@@ -27,9 +24,7 @@ def checker(func: Callable) -> Callable:
 
 @checker
 def travis(branch: str):
-    """
-    Performs necessary checks to ensure that the travis build is one
-    that should create releases.
+    """Performs necessary checks to ensure that the travis build is one that should create releases.
 
     :param branch: The branch the environment should be running against.
     """
@@ -39,9 +34,8 @@ def travis(branch: str):
 
 @checker
 def semaphore(branch: str):
-    """
-    Performs necessary checks to ensure that the semaphore build is successful,
-    on the correct branch and not a pull-request.
+    """Performs necessary checks to ensure that the semaphore build is successful, on the correct branch and not a pull-
+    request.
 
     :param branch:  The branch the environment should be running against.
     """
@@ -52,9 +46,7 @@ def semaphore(branch: str):
 
 @checker
 def frigg(branch: str):
-    """
-    Performs necessary checks to ensure that the frigg build is one
-    that should create releases.
+    """Performs necessary checks to ensure that the frigg build is one that should create releases.
 
     :param branch: The branch the environment should be running against.
     """
@@ -64,9 +56,7 @@ def frigg(branch: str):
 
 @checker
 def circle(branch: str):
-    """
-    Performs necessary checks to ensure that the circle build is one
-    that should create releases.
+    """Performs necessary checks to ensure that the circle build is one that should create releases.
 
     :param branch: The branch the environment should be running against.
     """
@@ -76,9 +66,7 @@ def circle(branch: str):
 
 @checker
 def gitlab(branch: str):
-    """
-    Performs necessary checks to ensure that the gitlab build is one
-    that should create releases.
+    """Performs necessary checks to ensure that the gitlab build is one that should create releases.
 
     :param branch: The branch the environment should be running against.
     """
@@ -88,9 +76,7 @@ def gitlab(branch: str):
 
 @checker
 def bitbucket(branch: str):
-    """
-    Performs necessary checks to ensure that the bitbucket build is one
-    that should create releases.
+    """Performs necessary checks to ensure that the bitbucket build is one that should create releases.
 
     :param branch: The branch the environment should be running against.
     """
@@ -100,9 +86,7 @@ def bitbucket(branch: str):
 
 @checker
 def jenkins(branch: str):
-    """
-    Performs necessary checks to ensure that the jenkins build is one
-    that should create releases.
+    """Performs necessary checks to ensure that the jenkins build is one that should create releases.
 
     :param branch: The branch the environment should be running against.
     """
@@ -114,9 +98,7 @@ def jenkins(branch: str):
 
 
 def check(branch: str = "master"):
-    """
-    Detects the current CI environment, if any, and performs necessary
-    environment checks.
+    """Detects the current CI environment, if any, and performs necessary environment checks.
 
     :param branch: The branch that should be the current branch.
     """

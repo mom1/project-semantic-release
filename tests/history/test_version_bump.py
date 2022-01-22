@@ -1,9 +1,17 @@
-import mock
+from unittest import mock
 
 from semantic_release.history import evaluate_version_bump
 
 from .. import wrapped_config_get
-from . import *
+from . import (
+    ALL_KINDS_OF_COMMIT_MESSAGES,
+    MAJOR,
+    MAJOR_MENTIONING_LAST_VERSION,
+    MINOR,
+    MINOR_AND_PATCH_COMMIT_MESSAGES,
+    NO_TAG,
+    PATCH_COMMIT_MESSAGES,
+)
 
 
 def test_major():
@@ -72,9 +80,7 @@ def test_should_return_none_without_tagged_commits():
 
 @mock.patch("semantic_release.history.logs.get_commit_log", lambda *a, **kw: [])
 def test_should_return_none_without_commits():
-    """
-    Make sure that we do not release if there are no commits since last release.
-    """
+    """Make sure that we do not release if there are no commits since last release."""
     with mock.patch("semantic_release.history.config.get", lambda *x: True):
         assert evaluate_version_bump("1.1.0") is None
 

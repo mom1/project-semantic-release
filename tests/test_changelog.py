@@ -1,4 +1,5 @@
-import mock
+from unittest import mock
+
 import pytest
 
 from semantic_release.changelog import markdown_changelog

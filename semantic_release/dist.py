@@ -1,5 +1,4 @@
-"""Build and manage distributions
-"""
+"""Build and manage distributions."""
 import logging
 import shutil
 

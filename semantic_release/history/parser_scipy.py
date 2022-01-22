@@ -1,5 +1,4 @@
-"""
-Parses commit messages using `scipy tags <scipy-style>`_ of the form::
+"""Parses commit messages using `scipy tags <scipy-style>`_ of the form::
 
     <tag>(<scope>): <subject>
 
@@ -33,7 +32,7 @@ Supported Changelog Sections::
     breaking, feature, fix, Other, None
 
 .. _`scipy-style`: https://docs.scipy.org/doc/scipy/reference/dev/contributor/development_workflow.html#writing-the-commit-message
-"""
+"""  # noqa: E501
 
 import logging
 import re
@@ -107,8 +106,7 @@ re_parser = re.compile(
 
 @LoggedFunction(logger)
 def parse_commit_message(message: str) -> ParsedCommit:
-    """
-    Parse a scipy-style commit message
+    """Parse a scipy-style commit message.
 
     :param message: A string of a commit message.
     :return: A tuple of (level to bump, type of change, scope of change, a tuple
@@ -127,7 +125,7 @@ def parse_commit_message(message: str) -> ParsedCommit:
 
     if parsed.group("text"):
         blocks = parsed.group("text").split("\n\n")
-        blocks = [x for x in blocks if not x == ""]
+        blocks = [x for x in blocks if x != ""]
         blocks.insert(0, subject)
     else:
         blocks = [subject]

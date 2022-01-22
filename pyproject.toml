@@ -74,6 +74,8 @@ black = "^21.12b0"
 mypy = "*"
 types-requests = "*"
 types-emoji = "*"
+ipdb = "^0.13"
+pytest-deadfixtures = "^2.2"
 
 [tool.semantic_release]
 branch = "main"

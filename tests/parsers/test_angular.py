@@ -65,7 +65,7 @@ def test_parser_return_subject_from_commit_message():
 
 
 def test_parser_return_text_from_commit_message():
-    assert angular_parser("fix(parser): Fix regex in an parser\n\n{}".format(text))[3][1] == text
+    assert angular_parser(f"fix(parser): Fix regex in an parser\n\n{text}")[3][1] == text
 
 
 def test_parser_return_footer_from_commit_message():

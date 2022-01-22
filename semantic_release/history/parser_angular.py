@@ -56,7 +56,7 @@ def parse_commit_message(message: str) -> ParsedCommit:
     parsed_type = parsed.group("type")
 
     if parsed_text:
-        descriptions = parse_paragraphs(parsed_text)
+        descriptions = [i.replace("\n", " ") for i in parse_paragraphs(parsed_text)]
     else:
         descriptions = []
     # Insert the subject before the other paragraphs

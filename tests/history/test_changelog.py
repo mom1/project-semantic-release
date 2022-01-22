@@ -1,10 +1,23 @@
-import mock
+from unittest import mock
+
 import pytest
 
 from semantic_release.history.logs import generate_changelog
 
 from .. import wrapped_config_get
-from . import *
+from . import (
+    ALL_KINDS_OF_COMMIT_MESSAGES,
+    MAJOR,
+    MAJOR2,
+    MAJOR_EXCL_NOT_FOOTER,
+    MAJOR_EXCL_WITH_FOOTER,
+    MAJOR_LAST_RELEASE_MINOR_AFTER,
+    MAJOR_MENTIONING_1_0_0,
+    MAJOR_MULTIPLE_FOOTERS,
+    MINOR,
+    PATCH,
+    UNKNOWN_STYLE,
+)
 
 
 def test_should_generate_necessary_sections():
@@ -133,14 +146,8 @@ def test_scope_included_in_changelog_configurable(commit, commit_type):
     ],
 )
 def test_message_capitalization_is_configurable(commit, config_setting, expected_description):
-    with mock.patch(
-        "semantic_release.history.logs.get_commit_log",
-        lambda *a, **kw: [commit],
+    with mock.patch("semantic_release.history.logs.get_commit_log", lambda *a, **kw: [commit]), mock.patch(
+        "semantic_release.history.config.get", wrapped_config_get(changelog_capitalize=config_setting)
     ):
-
-        with mock.patch(
-            "semantic_release.history.config.get",
-            wrapped_config_get(changelog_capitalize=config_setting),
-        ):
-            changelog = generate_changelog("0.0.0")
-            assert changelog["fix"][0][1] == expected_description
+        changelog = generate_changelog("0.0.0")
+        assert changelog["fix"][0][1] == expected_description

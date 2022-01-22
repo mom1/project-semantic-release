@@ -36,8 +36,8 @@ class TextProc:
 class ReSub:
     __slots__ = ("compile_pattern", "func", "__name__", "kwargs")
 
-    def __init__(self, pattern: Union[AnyStr, Pattern[AnyStr]], flags=re.I, **kwargs):
-        self.compile_pattern: Pattern = re.compile(pattern, flags=flags)
+    def __init__(self, pattern: Union[AnyStr, Pattern[AnyStr]], flags=None, **kwargs):
+        self.compile_pattern: Pattern = re.compile(pattern, flags=flags or re.I)
         self.kwargs = kwargs
         self.__name__ = "ReSub"
 
@@ -183,14 +183,14 @@ else:
 
 
 try:
-    import chevron
+    import chevron  # noqa: F401
 except ImportError:
     pass
 else:
 
     @ReSub("", **dict(zip(("owner", "repo_name"), get_repository_owner_and_name())))
     def get_hash_link(msg: str, _, render, owner="", repo_name="") -> str:
-        """Generate the link for commit hash"""
+        """Generate the link for commit hash."""
         hash_ = render(msg)
         url = (
             f"https://{Gitlab.domain()}/{owner}/{repo_name}/-/commit/{hash_}"
