@@ -5,7 +5,7 @@ from ..settings import config
 
 def get_handler(name: str, default: handlers.TextProc = handlers.noop):
     result_handler = default
-    for handler in config.get(name, "").split(","):
+    for handler in config.get(name, []):
         handler = handler.strip()
         if handler:
             result_handler |= getattr(handlers, handler, None) or import_path(handler)

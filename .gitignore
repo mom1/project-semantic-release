@@ -136,3 +136,6 @@ dmypy.json
 .vscode/
 
 pyrightconfig.json
+
+# Ignore dynaconf secret files
+.secrets.*

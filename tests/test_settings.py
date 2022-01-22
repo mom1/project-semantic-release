@@ -5,7 +5,7 @@ from unittest import TestCase
 
 from semantic_release.errors import ImproperConfigurationError
 from semantic_release.history import parser_angular
-from semantic_release.settings import _config, current_commit_parser
+from semantic_release.settings import _config, import_from_settings
 
 from . import mock, reset_config
 
@@ -115,18 +115,18 @@ foo = "bar"
         # delete temporary toml config file
         os.remove(dummy_conf_path)
 
-    @mock.patch("semantic_release.settings.config.get", lambda *x: "nonexistent.parser")
+    @mock.patch("semantic_release.settings.config.get", lambda *_: "nonexistent.parser")
     def test_current_commit_parser_should_raise_error_if_parser_module_do_not_exist(
         self,
     ):
-        self.assertRaises(ImproperConfigurationError, current_commit_parser)
+        self.assertRaises(ImproperConfigurationError, import_from_settings("commit_parser"))
 
     @mock.patch(
         "semantic_release.settings.config.get",
-        lambda *x: "semantic_release.not_a_parser",
+        lambda *_: "semantic_release.not_a_parser",
     )
     def test_current_commit_parser_should_raise_error_if_parser_do_not_exist(self):
-        self.assertRaises(ImproperConfigurationError, current_commit_parser)
+        self.assertRaises(ImproperConfigurationError, import_from_settings("commit_parser"))
 
     def test_current_commit_parser_should_return_correct_parser(self):
-        self.assertEqual(current_commit_parser(), parser_angular.parse_commit_message)
+        self.assertEqual(import_from_settings("commit_parser")(), parser_angular.parse_commit_message)

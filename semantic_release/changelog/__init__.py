@@ -1,10 +1,12 @@
 import logging
 
 from ..helpers import LoggedFunction
-from ..settings import config, current_changelog_components
+from ..settings import config, import_from_settings
 
-from .changelog import changelog_headers, changelog_table  # noqa isort:skip
+from .changelog import changelog_headers, changelog_table, changelog_template  # noqa isort:skip
 from .compare import compare_url  # noqa isort:skip
+
+__all__ = ("compare_url", "changelog_headers", "changelog_table", "changelog_template")
 
 logger = logging.getLogger(__name__)
 
@@ -18,8 +20,7 @@ def markdown_changelog(
     header: bool = False,
     previous_version: str = None,
 ) -> str:
-    """
-    Generate a markdown version of the changelog.
+    """Generate a markdown version of the changelog.
 
     :param owner: The repo owner.
     :param repo_name: The repo name.
@@ -30,25 +31,23 @@ def markdown_changelog(
     :param header: A boolean that decides whether a version number header should be included.
     :return: The markdown formatted changelog.
     """
-    output = f"## v{version}\n" if header else ""
+    output = ""
 
     # Add the output of each component separated by a blank line
     output += "\n\n".join(
-        (
-            component_output.strip()
-            for component_output in (
-                component(
-                    owner=owner,
-                    repo_name=repo_name,
-                    version=version,
-                    previous_version=previous_version,
-                    changelog=changelog,
-                    changelog_sections=config.get("changelog_sections").split(","),
-                )
-                for component in current_changelog_components()
+        component_output.strip()
+        for component_output in (
+            component(
+                owner=owner,
+                repo_name=repo_name,
+                version=version,
+                previous_version=previous_version,
+                changelog=changelog,
+                changelog_sections=config.get("changelog_sections"),
             )
-            if component_output is not None
+            for component in import_from_settings("changelog_components")
         )
+        if component_output is not None
     )
 
     return output

@@ -1,5 +1,4 @@
-"""CLI
-"""
+"""CLI."""
 import logging
 import os
 import sys
@@ -30,7 +29,7 @@ from .hvcs import (
     upload_to_release,
 )
 from .repository import ArtifactRepo
-from .settings import config, current_commit_analyzer, overload_configuration
+from .settings import config, import_from_settings, overload_configuration
 from .vcs_helpers import (
     checkout,
     commit_new_version,
@@ -74,22 +73,16 @@ COMMON_OPTIONS = [
     overload_configuration,
 ]
 
-commit_analyzer = current_commit_analyzer()
-
 
 def common_options(func):
-    """
-    Decorator that adds all the options in COMMON_OPTIONS
-    """
+    """Decorator that adds all the options in COMMON_OPTIONS."""
     for option in reversed(COMMON_OPTIONS):
         func = option(func)
     return func
 
 
-def print_version(*, current=False, force_level=None, **kwargs):
-    """
-    Print the current or new version to standard output.
-    """
+def print_version(*, current=False, force_level=None, **_):
+    """Print the current or new version to standard output."""
     try:
         current_version = get_current_version()
     except GitError as e:
@@ -110,9 +103,8 @@ def print_version(*, current=False, force_level=None, **kwargs):
     return False
 
 
-def version(*, retry=False, noop=False, force_level=None, **kwargs):
-    """
-    Detect the new version according to git log and semver.
+def version(*, retry=False, noop=False, force_level=None, **_):
+    """Detect the new version according to git log and semver.
 
     Write the new version number and commit it, unless the noop option is True.
     """
@@ -166,16 +158,12 @@ def should_bump_version(*, current_version, new_version, retry=False, noop=False
 
 
 def bump_version(new_version, level_bump):
-    """
-    Set the version to the given `new_version`.
+    """Set the version to the given `new_version`.
 
     Edit in the source code, commit and create a git tag.
     """
     set_new_version(new_version)
-    if config.get(
-        "commit_version_number",
-        config.get("version_source") == "commit",
-    ):
+    if config.get("commit_version_number", config.get("version_source") == "commit"):
         commit_new_version(new_version)
     if config.get("version_source") == "tag" or config.get("tag_commit"):
         tag_new_version(new_version)
@@ -183,9 +171,8 @@ def bump_version(new_version, level_bump):
     logger.info(f"Bumping with a {level_bump} version to {new_version}")
 
 
-def changelog(*, unreleased=False, noop=False, post=False, **kwargs):
-    """
-    Generate the changelog since the last release.
+def changelog(*, unreleased=False, noop=False, post=False, **_):
+    """Generate the changelog since the last release.
 
     :raises ImproperConfigurationError: if there is no current version
     """
@@ -196,7 +183,7 @@ def changelog(*, unreleased=False, noop=False, post=False, **kwargs):
         )
 
     previous_version = get_previous_version(current_version)
-
+    commit_analyzer = import_from_settings("commit_analyzer")
     # Generate the changelog
     if unreleased:
         log = commit_analyzer(current_version, None)
@@ -251,6 +238,7 @@ def publish(retry: bool = False, noop: bool = False, **kwargs):
         retry=retry,
         noop=noop,
     ):
+        commit_analyzer = import_from_settings("commit_analyzer")
         log = commit_analyzer(current_version)
         changelog_md = markdown_changelog(
             owner,
@@ -336,7 +324,7 @@ def merge_request(
         mr_title = f"{commit_prefix}: {mr_title}"
 
     owner, name = get_repository_owner_and_name()
-
+    commit_analyzer = import_from_settings("commit_analyzer")
     log = commit_analyzer(None, None, f"{source_branch}...{target_branch or ''}")
 
     return post_pull_request(
@@ -364,13 +352,13 @@ def filter_output_for_secrets(message):
 
 def entry():
     # Move flags to after the command
-    ARGS = sorted(sys.argv[1:], key=lambda x: 1 if x.startswith("--") else -1)
+    args = sorted(sys.argv[1:], key=lambda x: 1 if x.startswith("--") else -1)
 
-    if ARGS and not ARGS[0].startswith("print-"):
+    if args and not args[0].startswith("print-"):
         # print-* command output should not be polluted with logging.
         click_log.basic_config()
 
-    main(args=ARGS)
+    main(args=args)
 
 
 #

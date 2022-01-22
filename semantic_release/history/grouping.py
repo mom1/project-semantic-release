@@ -6,7 +6,7 @@ from ..settings import config
 try:
     from .processing import get_handler
 except ImportError:
-    get_handler = lambda *args, **kwargs: lambda *args: ""
+    get_handler = lambda *args, **kwargs: lambda *args: ""  # noqa:E731
 
 
 def changelog_grouping(owner: str, repo_name: str, changelog: list, changelog_sections: list, **kwargs):
@@ -37,14 +37,14 @@ def changelog_composite_grouping(owner: str, repo_name: str, changelog: list, **
     """
     grouping_field = config.get("grouping_field", "type").strip()
     groups = {}
-    composite_groups = tuple(sg for g in config.get("composite_groups", "").split(",") if (sg := g.strip()))
+    composite_groups = tuple(sg for g in config.get("composite_groups", []) if (sg := g.strip()))
     for group in composite_groups:
-        for i in config.get(f"composite_groups_{group}", "").split(","):
+        for i in config.get(f"composite_groups_{group}", []):
             groups[i.strip()] = group
 
     sections: DefaultDict[str, List[Dict[str, Any]]] = defaultdict(list)
     handler = get_handler("changelog_section_handlers")
-    ignore_types = set(i.strip() for i in config.get("composite_groups_ignore_types", "").split(","))
+    ignore_types = {i.strip() for i in config.get("composite_groups_ignore_types", [])}
     ignore_types.add(None)
     other_group = groups.get("*")
 
