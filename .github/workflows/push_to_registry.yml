@@ -26,6 +26,8 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: mom1/project-semantic-release
+          tags: |
+            type=semver,pattern={{version}}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
