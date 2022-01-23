@@ -480,6 +480,13 @@ def cmd_print_version(**kwargs):
     help="If set allow, commits from members who can merge to the target branch.",
 )
 @click.option("--insecure", "-k", is_flag=True, help="Do not verify server SSL certificate.")
+@click.option(
+    "--define",
+    "-D",
+    multiple=True,
+    help='setting="value", override a configuration value.',
+)
+@overload_configuration
 def cmd_merge_request(**kwargs):
     try:
         return merge_request(**kwargs)
