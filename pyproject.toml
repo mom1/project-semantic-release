@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "project-semantic-release"
-version = "1.0.1"
+version = "1.0.2"
 description = "Automatic semantic versioning for python projects"
 authors = ["MaxST <mstolpasov@gmail.com>"]
 license = "MIT"
