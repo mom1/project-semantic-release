@@ -1,11 +1,10 @@
-"""Logs
-"""
+"""Logs."""
 import logging
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional
 
 from ..errors import UnknownCommitMessageStyleError
 from ..helpers import LoggedFunction
-from ..settings import config, current_commit_parser
+from ..settings import config, import_from_settings
 from ..vcs_helpers import get_commit_log, get_commits_beetwen
 from .parser_helpers import ParsedCommit
 
@@ -21,8 +20,7 @@ LEVELS = {
 
 @LoggedFunction(logger)
 def evaluate_version_bump(current_version: str, force: str = None) -> Optional[str]:
-    """
-    Read git log since the last release to decide if we should make a major, minor or patch release.
+    """Read git log since the last release to decide if we should make a major, minor or patch release.
 
     :param current_version: A string with the current version number.
     :param force: A string with the bump level that should be forced.
@@ -36,19 +34,19 @@ def evaluate_version_bump(current_version: str, force: str = None) -> Optional[s
 
     changes = []
     commit_count = 0
-
-    for _hash, commit_message in get_commit_log(current_version):
+    commit_parser = import_from_settings("commit_parser")
+    for _, commit_message in get_commit_log(current_version):
         if commit_message.startswith(current_version):
             # Stop once we reach the current version
             # (we are looping in the order of newest -> oldest)
             logger.debug(f'"{commit_message}" is commit for {current_version}, breaking loop')
             break
 
-        commit_count += 1
+        commit_count += 1  # noqa: SIM113
 
         # Attempt to parse this commit using the currently-configured parser
         try:
-            message = current_commit_parser()(commit_message)
+            message = commit_parser(commit_message)
             changes.append(message.bump)
         except UnknownCommitMessageStyleError as err:
             logger.debug(f"Ignoring UnknownCommitMessageStyleError: {err}")
@@ -66,7 +64,7 @@ def evaluate_version_bump(current_version: str, force: str = None) -> Optional[s
 
     if config.get("patch_without_tag") and commit_count > 0 and bump is None:
         bump = "patch"
-        logger.debug(f"Changing bump level to patch based on config patch_without_tag")
+        logger.debug("Changing bump level to patch based on config patch_without_tag")
 
     if not config.get("major_on_zero") and current_version.startswith("0.") and bump == "major":
         bump = "minor"
@@ -77,8 +75,7 @@ def evaluate_version_bump(current_version: str, force: str = None) -> Optional[s
 
 @LoggedFunction(logger)
 def generate_changelog(from_version: str, to_version: str = None) -> dict:
-    """
-    Parse a changelog dictionary for the given version.
+    """Parse a changelog dictionary for the given version.
 
     :param from_version: The version before where the changelog starts.
                          The changelog will be generated from the commit after this one.
@@ -92,7 +89,7 @@ def generate_changelog(from_version: str, to_version: str = None) -> dict:
     if from_version:
         rev = from_version
 
-    commit_parser = current_commit_parser()
+    commit_parser = import_from_settings("commit_parser")
 
     found_the_release = to_version is None
     for _hash, commit_message in get_commit_log(rev):
@@ -114,7 +111,7 @@ def generate_changelog(from_version: str, to_version: str = None) -> dict:
             message = commit_parser(commit_message)
             if message.type not in changes:
                 logger.debug(f"Creating new changelog section for {message.type} ")
-                changes[message.type] = list()
+                changes[message.type] = []
 
             # Capitalize the first letter of the message, leaving others as they were
             # (using str.capitalize() would make the other letters lowercase)
@@ -148,7 +145,7 @@ def generate_changelog(from_version: str, to_version: str = None) -> dict:
 @LoggedFunction(logger)
 def get_commits(from_version: str, to_version: str = None, rev: str = None) -> List[Dict[str, Any]]:
     results = []
-    commit_parser: Callable[[str], ParsedCommit] = current_commit_parser()
+    commit_parser: Callable[[str], ParsedCommit] = import_from_settings("commit_parser")
 
     for commit in get_commits_beetwen(from_version, to_version, rev):
         message: ParsedCommit = commit_parser(commit.message)

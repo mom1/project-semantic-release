@@ -1,9 +1,8 @@
-"""HVCS
-"""
+"""HVCS."""
 import logging
 import mimetypes
 import os
-from typing import Any, Dict, Optional, Union
+from typing import Optional, Union
 from urllib.parse import urlsplit
 
 from gitlab import Gitlab as GitlabObj
@@ -23,7 +22,7 @@ logger = logging.getLogger(__name__)
 mimetypes.add_type("application/octet-stream", ".whl")
 
 
-class Base(object):
+class Base:
     @staticmethod
     def domain() -> str:
         raise NotImplementedError
@@ -65,23 +64,18 @@ class Base(object):
 
 def _fix_mime_types():
     """Fix incorrect entries in the `mimetypes` registry.
-    On Windows, the Python standard library's `mimetypes` reads in
-    mappings from file extension to MIME type from the Windows
-    registry. Other applications can and do write incorrect values
-    to this registry, which causes `mimetypes.guess_type` to return
-    incorrect values, which causes TensorBoard to fail to render on
-    the frontend.
-    This method hard-codes the correct mappings for certain MIME
-    types that are known to be either used by project-semantic-release or
-    problematic in general.
+
+    On Windows, the Python standard library's `mimetypes` reads in mappings from file extension to MIME type from the
+    Windows registry. Other applications can and do write incorrect values to this registry, which causes
+    `mimetypes.guess_type` to return incorrect values, which causes TensorBoard to fail to render on the frontend. This
+    method hard-codes the correct mappings for certain MIME types that are known to be either used by project-semantic-
+    release or problematic in general.
     """
     mimetypes.add_type("text/markdown", ".md")
 
 
 class TokenAuth(AuthBase):
-    """
-    requests Authentication for token based authorization
-    """
+    """requests Authentication for token based authorization."""
 
     def __init__(self, token):
         self.token = token
@@ -94,7 +88,7 @@ class TokenAuth(AuthBase):
         )
 
     def __ne__(self, other):
-        return not self == other
+        return self != other
 
     def __call__(self, r):
         r.headers["Authorization"] = f"token {self.token}"
@@ -102,14 +96,14 @@ class TokenAuth(AuthBase):
 
 
 class Github(Base):
-    """Github helper class"""
+    """Github helper class."""
 
     DEFAULT_DOMAIN = "github.com"
     _fix_mime_types()
 
     @staticmethod
     def domain() -> str:
-        """Github domain property
+        """Github domain property.
 
         :return: The Github domain
         """
@@ -120,7 +114,7 @@ class Github(Base):
 
     @staticmethod
     def api_url() -> str:
-        """Github api_url property
+        """Github api_url property.
 
         :return: The Github API URL
         """
@@ -133,7 +127,7 @@ class Github(Base):
 
     @staticmethod
     def token() -> Optional[str]:
-        """Github token property
+        """Github token property.
 
         :return: The Github token environment variable (GH_TOKEN) value
         """
@@ -141,7 +135,7 @@ class Github(Base):
 
     @staticmethod
     def auth() -> Optional[TokenAuth]:
-        """Github token property
+        """Github token property.
 
         :return: The Github token environment variable (GH_TOKEN) value
         """
@@ -159,7 +153,7 @@ class Github(Base):
     @staticmethod
     @LoggedFunction(logger)
     def check_build_status(owner: str, repo: str, ref: str) -> bool:
-        """Check build status
+        """Check build status.
 
         https://docs.github.com/rest/reference/repos#get-the-combined-status-for-a-specific-reference
 
@@ -180,7 +174,7 @@ class Github(Base):
     @classmethod
     @LoggedFunction(logger)
     def create_release(cls, owner: str, repo: str, tag: str, changelog: str) -> bool:
-        """Create a new release
+        """Create a new release.
 
         https://docs.github.com/rest/reference/repos#create-a-release
 
@@ -210,7 +204,7 @@ class Github(Base):
     @classmethod
     @LoggedFunction(logger)
     def get_release(cls, owner: str, repo: str, tag: str) -> Optional[int]:
-        """Get a release by its tag name
+        """Get a release by its tag name.
 
         https://docs.github.com/rest/reference/repos#get-a-release-by-tag-name
 
@@ -231,7 +225,7 @@ class Github(Base):
     @classmethod
     @LoggedFunction(logger)
     def edit_release(cls, owner: str, repo: str, id: int, changelog: str) -> bool:
-        """Edit a release with updated change notes
+        """Edit a release with updated change notes.
 
         https://docs.github.com/rest/reference/repos#update-a-release
 
@@ -255,7 +249,7 @@ class Github(Base):
     @classmethod
     @LoggedFunction(logger)
     def post_release_changelog(cls, owner: str, repo: str, version: str, changelog: str) -> bool:
-        """Post release changelog
+        """Post release changelog.
 
         :param owner: The owner namespace of the repository
         :param repo: The repository name
@@ -275,14 +269,14 @@ class Github(Base):
                 logger.debug(f"Updating release {release_id}")
                 success = Github.edit_release(owner, repo, release_id, changelog)
             else:
-                logger.debug(f"Existing release not found")
+                logger.debug("Existing release not found")
 
         return success
 
     @classmethod
     @LoggedFunction(logger)
     def upload_asset(cls, owner: str, repo: str, release_id: int, file: str, label: str = None) -> bool:
-        """Upload an asset to an existing release
+        """Upload an asset to an existing release.
 
         https://docs.github.com/rest/reference/repos#upload-a-release-asset
 
@@ -301,14 +295,15 @@ class Github(Base):
             content_type = "application/octet-stream"
 
         try:
-            response = Github.session().post(
-                url,
-                params={"name": os.path.basename(file), "label": label},
-                headers={
-                    "Content-Type": content_type,
-                },
-                data=open(file, "rb").read(),
-            )
+            with open(file, "rb") as fileobj:
+                response = Github.session().post(
+                    url,
+                    params={"name": os.path.basename(file), "label": label},
+                    headers={
+                        "Content-Type": content_type,
+                    },
+                    data=fileobj.read(),
+                )
 
             logger.debug(f"Asset upload on Github completed, url: {response.url}, status code: {response.status_code}")
 
@@ -319,7 +314,7 @@ class Github(Base):
 
     @classmethod
     def upload_dists(cls, owner: str, repo: str, version: str, path: str) -> bool:
-        """Upload distributions to a release
+        """Upload distributions to a release.
 
         :param owner: The owner namespace of the repository
         :param repo: The repository name
@@ -347,11 +342,11 @@ class Github(Base):
 
 
 class Gitlab(Base):
-    """Gitlab helper class"""
+    """Gitlab helper class."""
 
     @staticmethod
     def domain() -> str:
-        """Gitlab domain property
+        """Gitlab domain property.
 
         :return: The Gitlab instance domain
         """
@@ -365,7 +360,7 @@ class Gitlab(Base):
 
     @staticmethod
     def api_url() -> str:
-        """Gitlab api_url property
+        """Gitlab api_url property.
 
         :return: The Gitlab instance API url
         """
@@ -377,7 +372,7 @@ class Gitlab(Base):
 
     @staticmethod
     def token() -> Optional[str]:
-        """Gitlab token property
+        """Gitlab token property.
 
         :return: The Gitlab token environment variable (GL_TOKEN) value
         """
@@ -386,7 +381,7 @@ class Gitlab(Base):
     @staticmethod
     @LoggedFunction(logger)
     def check_build_status(owner: str, repo: str, ref: str) -> bool:
-        """Check last build status
+        """Check last build status.
 
         :param owner: The owner namespace of the repository. It includes all groups and subgroups.
         :param repo: The repository name
@@ -410,7 +405,7 @@ class Gitlab(Base):
     @classmethod
     @LoggedFunction(logger)
     def post_release_changelog(cls, owner: str, repo: str, version: str, changelog: str) -> bool:
-        """Post release changelog
+        """Post release changelog.
 
         :param owner: The owner namespace of the repository
         :param repo: The repository name
@@ -423,7 +418,7 @@ class Gitlab(Base):
         gl = GitlabObj(Gitlab.api_url(), private_token=Gitlab.token())
         gl.auth()
         try:
-            logger.debug(f"Before release create call")
+            logger.debug("Before release create call")
             gl.projects.get(owner + "/" + repo).releases.create(
                 {
                     "name": "Release " + version,
@@ -500,7 +495,7 @@ class Gitlab(Base):
 
 @LoggedFunction(logger)
 def get_hvcs() -> Base:
-    """Get HVCS helper class
+    """Get HVCS helper class.
 
     :raises ImproperConfigurationError: if the hvcs option provided is not valid
     """
@@ -512,8 +507,7 @@ def get_hvcs() -> Base:
 
 
 def check_build_status(owner: str, repository: str, ref: str) -> bool:
-    """
-    Checks the build status of a commit on the api from your hosted version control provider.
+    """Checks the build status of a commit on the api from your hosted version control provider.
 
     :param owner: The owner of the repository
     :param repository: The repository name
@@ -525,8 +519,7 @@ def check_build_status(owner: str, repository: str, ref: str) -> bool:
 
 
 def post_changelog(owner: str, repository: str, version: str, changelog: str) -> bool:
-    """
-    Posts the changelog to the current hvcs release API
+    """Posts the changelog to the current hvcs release API.
 
     :param owner: The owner of the repository
     :param repository: The repository name
@@ -539,8 +532,7 @@ def post_changelog(owner: str, repository: str, version: str, changelog: str) ->
 
 
 def upload_to_release(owner: str, repository: str, version: str, path: str) -> bool:
-    """
-    Upload distributions to the current hvcs release API
+    """Upload distributions to the current hvcs release API.
 
     :param owner: The owner of the repository
     :param repository: The repository name
@@ -554,8 +546,7 @@ def upload_to_release(owner: str, repository: str, version: str, path: str) -> b
 
 
 def get_token() -> Optional[str]:
-    """
-    Returns the token for the current VCS
+    """Returns the token for the current VCS.
 
     :return: The token in string form
     """
@@ -563,8 +554,7 @@ def get_token() -> Optional[str]:
 
 
 def get_domain() -> Optional[str]:
-    """
-    Returns the domain for the current VCS
+    """Returns the domain for the current VCS.
 
     :return: The domain in string form
     """
@@ -572,8 +562,7 @@ def get_domain() -> Optional[str]:
 
 
 def check_token() -> bool:
-    """
-    Checks whether there exists a token or not.
+    """Checks whether there exists a token or not.
 
     :return: A boolean telling if there is a token.
     """
@@ -589,8 +578,7 @@ def post_pull_request(
     target_branch: str,
     **kwargs,
 ) -> bool:
-    """
-    Create the Merge request to the current hvcs release API
+    """Create the Merge request to the current hvcs release API.
 
     :param owner: The owner of the repository
     :param repository: The repository name

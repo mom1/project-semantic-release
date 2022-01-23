@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""Custom Errors
-"""
+"""Custom Errors."""
 
 
 class SemanticReleaseBaseError(Exception):

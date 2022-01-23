@@ -65,7 +65,7 @@ def test_parser_return_subject_from_commit_message():
 
 
 def test_parser_return_text_from_commit_message():
-    assert angular_parser("fix(parser): Fix regex in an parser\n\n{}".format(text))[3][1] == text
+    assert angular_parser(f"fix(parser): Fix regex in an parser\n\n{text}")[3][1] == text
 
 
 def test_parser_return_footer_from_commit_message():
@@ -82,7 +82,7 @@ def test_parser_should_accept_message_without_scope():
 # test custom parser options #
 ##############################
 @mock.patch(
-    "semantic_release.history.parser_angular.config.get",
+    "semantic_release.history.parser_angular.config",
     wrapped_config_get(parser_angular_default_level_bump="minor"),
 )
 def test_parser_custom_default_level():
@@ -90,8 +90,21 @@ def test_parser_custom_default_level():
 
 
 @mock.patch(
-    "semantic_release.history.parser_angular.config.get",
-    wrapped_config_get(parser_angular_allowed_types="custom,build,chore,ci,docs,fix,perf,style,refactor,test"),
+    "semantic_release.history.parser_angular.config",
+    wrapped_config_get(
+        parser_angular_allowed_types=[
+            "custom",
+            "build",
+            "chore",
+            "ci",
+            "docs",
+            "fix",
+            "perf",
+            "style",
+            "refactor",
+            "test",
+        ]
+    ),
 )
 def test_parser_custom_allowed_types():
     assert angular_parser("custom: ...")[0] == 0
@@ -100,7 +113,7 @@ def test_parser_custom_allowed_types():
 
 
 @mock.patch(
-    "semantic_release.history.parser_angular.config.get",
+    "semantic_release.history.parser_angular.config",
     wrapped_config_get(parser_angular_minor_types="docs"),
 )
 def test_parser_custom_minor_types():
@@ -108,7 +121,7 @@ def test_parser_custom_minor_types():
 
 
 @mock.patch(
-    "semantic_release.history.parser_angular.config.get",
+    "semantic_release.history.parser_angular.config",
     wrapped_config_get(parser_angular_patch_types="test"),
 )
 def test_parser_custom_patch_types():

@@ -17,8 +17,8 @@ def format_arg(value):
 
 
 def build_requests_session(raise_for_status=True, retry: Union[bool, int, Retry] = True) -> Session:
-    """
-    Create a requests session.
+    """Create a requests session.
+
     :param raise_for_status: If True, a hook to invoke raise_for_status be installed
     :param retry: If true, it will use default Retry configuration. if an integer, it will use default Retry
     configuration with given integer as total retry count. if Retry instance, it will use this instance.
@@ -41,8 +41,7 @@ def build_requests_session(raise_for_status=True, retry: Union[bool, int, Retry]
 
 
 class LoggedFunction:
-    """
-    Decorator which adds debug logging to a function.
+    """Decorator which adds debug logging to a function.
 
     The input arguments are logged before the function is called, and the
     return value is logged once it has completed.

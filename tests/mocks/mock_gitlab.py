@@ -100,7 +100,7 @@ class _GitlabProject:
         def get(self, version):
             if version == "vmy_good_tag":
                 return self._Tag()
-            elif version == "vmy_locked_tag":
+            elif version == "vmy_locked_tag":  # noqa: SIM106
                 return self._Tag(locked=True)
             else:
                 raise gitlab.exceptions.GitlabGetError
@@ -118,9 +118,12 @@ class _GitlabProject:
             pass
 
         def create(self, input):
-            if input["name"] and input["tag_name"]:
-                if input["tag_name"] == "vmy_good_tag" or input["tag_name"] == "vmy_locked_tag":
-                    return self._Release()
+            if (
+                input["name"]
+                and input["tag_name"]
+                and (input["tag_name"] == "vmy_good_tag" or input["tag_name"] == "vmy_locked_tag")
+            ):
+                return self._Release()
             raise gitlab.exceptions.GitlabCreateError
 
         class _Release:
@@ -131,7 +134,7 @@ class _GitlabProject:
 def mock_gitlab(status="success"):
     mocks = [
         mock.patch("os.environ", {"GL_TOKEN": "token"}),
-        mock.patch("semantic_release.hvcs.config.get", wrapped_config_get(hvcs="gitlab")),
+        mock.patch("semantic_release.hvcs.config", wrapped_config_get(hvcs="gitlab")),
         mock.patch("gitlab.Gitlab.auth"),
         mock.patch(
             "gitlab.v4.objects.ProjectManager",

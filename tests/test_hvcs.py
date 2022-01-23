@@ -3,7 +3,7 @@ import json
 import os
 import platform
 from tempfile import NamedTemporaryFile
-from unittest import TestCase, mock
+from unittest import TestCase
 
 import pytest
 import responses
@@ -26,17 +26,17 @@ temp_dir = (
 )
 
 
-@mock.patch("semantic_release.hvcs.config.get", wrapped_config_get(hvcs="github"))
+@mock.patch("semantic_release.hvcs.config", wrapped_config_get(hvcs="github"))
 def test_get_hvcs_should_return_github():
     assert get_hvcs() == Github
 
 
-@mock.patch("semantic_release.hvcs.config.get", wrapped_config_get(hvcs="gitlab"))
+@mock.patch("semantic_release.hvcs.config", wrapped_config_get(hvcs="gitlab"))
 def test_get_hvcs_should_return_gitlab():
     assert get_hvcs() == Gitlab
 
 
-@mock.patch("semantic_release.hvcs.config.get", lambda *_: "doesnotexist")
+@mock.patch("semantic_release.hvcs.config", wrapped_config_get(hvcs="doesnotexist"))
 def test_get_hvcs_should_raise_improper_config():
     pytest.raises(ImproperConfigurationError, get_hvcs)
 
@@ -62,7 +62,7 @@ def test_check_token_should_return_false():
 ###############################
 @mock.patch("os.environ", {"CUSTOM_GH_TOKEN": "token"})
 @mock.patch(
-    "semantic_release.hvcs.config.get",
+    "semantic_release.hvcs.config",
     wrapped_config_get(github_token_var="CUSTOM_GH_TOKEN"),
 )
 def test_check_custom_github_token_var_should_return_true():
@@ -71,7 +71,7 @@ def test_check_custom_github_token_var_should_return_true():
 
 @mock.patch("os.environ", {"GH_TOKEN": "token"})
 @mock.patch(
-    "semantic_release.hvcs.config.get",
+    "semantic_release.hvcs.config",
     wrapped_config_get(github_token_var="CUSTOM_TOKEN"),
 )
 def test_check_custom_github_token_should_return_false():
@@ -80,7 +80,7 @@ def test_check_custom_github_token_should_return_false():
 
 @mock.patch("os.environ", {"CUSTOM_GL_TOKEN": "token"})
 @mock.patch(
-    "semantic_release.hvcs.config.get",
+    "semantic_release.hvcs.config",
     wrapped_config_get(github_token_var="CUSTOM_GL_TOKEN"),
 )
 def test_check_custom_gitlab_token_var_should_return_true():
@@ -89,7 +89,7 @@ def test_check_custom_gitlab_token_var_should_return_true():
 
 @mock.patch("os.environ", {"GL_TOKEN": "token"})
 @mock.patch(
-    "semantic_release.hvcs.config.get",
+    "semantic_release.hvcs.config",
     wrapped_config_get(gitlab_token_var="CUSTOM_TOKEN"),
 )
 def test_check_custom_gitlab_token_should_return_false():
@@ -141,23 +141,18 @@ def test_get_domain_should_have_expected_domain(
 ):
 
     with mock.patch(
-        "semantic_release.hvcs.config.get",
+        "semantic_release.hvcs.config",
         wrapped_config_get(hvcs_domain=hvcs_domain, hvcs=hvcs, hvcs_api_domain=hvcs_api_domain),
+    ), mock.patch(
+        "os.environ",
+        {"GL_TOKEN": "token", "GH_TOKEN": "token", "CI_SERVER_HOST": ci_server_host},
     ):
-        with mock.patch(
-            "os.environ",
-            {
-                "GL_TOKEN": "token",
-                "GH_TOKEN": "token",
-                "CI_SERVER_HOST": ci_server_host,
-            },
-        ):
 
-            assert get_hvcs().domain() == expected_domain
-            assert get_hvcs().api_url() == api_url
+        assert get_hvcs().domain() == expected_domain
+        assert get_hvcs().api_url() == api_url
 
 
-@mock.patch("semantic_release.hvcs.config.get", wrapped_config_get(hvcs="github"))
+@mock.patch("semantic_release.hvcs.config", wrapped_config_get(hvcs="github"))
 @mock.patch(
     "os.environ",
     {
@@ -170,7 +165,7 @@ def test_ghe_domain_should_be_retrieved_from_env():
     assert get_hvcs().api_url() == "https://api.github.enterprise"
 
 
-@mock.patch("semantic_release.hvcs.config.get", wrapped_config_get(hvcs="gitlab"))
+@mock.patch("semantic_release.hvcs.config", wrapped_config_get(hvcs="gitlab"))
 @mock.patch("os.environ", {"GL_TOKEN": "token"})
 def test_get_token():
 

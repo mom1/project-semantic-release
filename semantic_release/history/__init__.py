@@ -1,5 +1,4 @@
-"""History
-"""
+"""History."""
 import csv
 import logging
 import re
@@ -21,6 +20,7 @@ from .parser_angular import parse_commit_message as angular_parser  # noqa isort
 from .parser_emoji import parse_commit_message as emoji_parser  # noqa isort:skip
 from .parser_scipy import parse_commit_message as scipy_parser  # noqa isort:skip
 from .parser_tag import parse_commit_message as tag_parser  # noqa isort:skip
+from .parser_gitmoji import gitmoji_parser  # noqa isort:skip
 
 logger = logging.getLogger(__name__)
 
@@ -31,49 +31,38 @@ class VersionDeclaration(ABC):
 
     @staticmethod
     def from_toml(config_str: str):
-        """
-        Instantiate a `TomlVersionDeclaration` from a string specifying a path and a key
-        matching the version number.
-        """
+        """Instantiate a `TomlVersionDeclaration` from a string specifying a path and a key matching the version
+        number."""
         path, key = config_str.split(":", 1)
         return TomlVersionDeclaration(path, key)
 
     @staticmethod
     def from_variable(config_str: str):
-        """
-        Instantiate a `PatternVersionDeclaration` from a string specifying a path and a
-        variable name.
-        """
+        """Instantiate a `PatternVersionDeclaration` from a string specifying a path and a variable name."""
         path, variable = config_str.split(":", 1)
         pattern = rf'{variable} *[:=] *["\']{PatternVersionDeclaration.version_regex}["\']'
         return PatternVersionDeclaration(path, pattern)
 
     @staticmethod
     def from_pattern(config_str: str):
-        """
-        Instantiate a `PatternVersionDeclaration` from a string specifying a path and a
-        regular expression matching the version number.
-        """
+        """Instantiate a `PatternVersionDeclaration` from a string specifying a path and a regular expression matching
+        the version number."""
         path, pattern = config_str.split(":", 1)
         pattern = pattern.format(version=PatternVersionDeclaration.version_regex)
         return PatternVersionDeclaration(path, pattern)
 
     @abstractmethod
     def parse(self) -> Set[str]:
-        """
-        Return the versions.
+        """Return the versions.
 
-        Because a source can match in multiple places, this method returns a
-        set of matches. Generally, there should only be one element in this
-        set (i.e. even if the version is specified in multiple places, it
-        should be the same version in each place), but it falls on the caller
-        to check for this condition.
+        Because a source can match in multiple places, this method returns a set of matches. Generally, there should
+        only be one element in this set (i.e. even if the version is specified in multiple places, it should be the same
+        version in each place), but it falls on the caller to check for this condition.
         """
 
     @abstractmethod
     def replace(self, new_version: str):
-        """
-        Update the versions.
+        """Update the versions.
 
         This method reads the underlying file, replaces each occurrence of the
         matched pattern, then writes the updated file.
@@ -105,13 +94,11 @@ class TomlVersionDeclaration(VersionDeclaration):
 
 
 class PatternVersionDeclaration(VersionDeclaration):
-    """
-    Represent a version number in a particular file.
+    """Represent a version number in a particular file.
 
-    The version number is identified by a regular expression.  Methods are
-    provided both the read the version number from the file, and to update the
-    file with a new version number.  Use the `load_version_patterns()` factory
-    function to create the version patterns specified in the config files.
+    The version number is identified by a regular expression.  Methods are provided both the read the version number
+    from the file, and to update the file with a new version number.  Use the `load_version_patterns()` factory function
+    to create the version patterns specified in the config files.
     """
 
     version_regex = r"(\d+\.\d+(?:\.\d+)?)"
@@ -123,14 +110,11 @@ class PatternVersionDeclaration(VersionDeclaration):
         self.pattern = pattern
 
     def parse(self) -> Set[str]:
-        """
-        Return the versions matching this pattern.
+        """Return the versions matching this pattern.
 
-        Because a pattern can match in multiple places, this method returns a
-        set of matches.  Generally, there should only be one element in this
-        set (i.e. even if the version is specified in multiple places, it
-        should be the same version in each place), but it falls on the caller
-        to check for this condition.
+        Because a pattern can match in multiple places, this method returns a set of matches.  Generally, there should
+        only be one element in this set (i.e. even if the version is specified in multiple places, it should be the same
+        version in each place), but it falls on the caller to check for this condition.
         """
         content = self.path.read_text()
 
@@ -142,8 +126,7 @@ class PatternVersionDeclaration(VersionDeclaration):
         return versions
 
     def replace(self, new_version: str):
-        """
-        Update the versions matching this pattern.
+        """Update the versions matching this pattern.
 
         This method reads the underlying file, replaces each occurrence of the
         matched pattern, then writes the updated file.
@@ -170,8 +153,7 @@ class PatternVersionDeclaration(VersionDeclaration):
 
 @LoggedFunction(logger)
 def get_current_version_by_tag() -> str:
-    """
-    Find the current version of the package in the current working directory using git tags.
+    """Find the current version of the package in the current working directory using git tags.
 
     :return: A string with the version number or 0.0.0 on failure.
     """
@@ -185,8 +167,7 @@ def get_current_version_by_tag() -> str:
 
 @LoggedFunction(logger)
 def get_current_version_by_config_file() -> str:
-    """
-    Get current version from the version variable defined in the configuration.
+    """Get current version from the version variable defined in the configuration.
 
     :return: A string with the current version number
     :raises ImproperConfigurationError: if either no versions are found, or
@@ -207,8 +188,7 @@ def get_current_version_by_config_file() -> str:
 
 
 def get_current_version() -> str:
-    """
-    Get current version from tag or version variable, depending on configuration.
+    """Get current version from tag or version variable, depending on configuration.
 
     :return: A string with the current version number
     """
@@ -219,8 +199,7 @@ def get_current_version() -> str:
 
 @LoggedFunction(logger)
 def get_new_version(current_version: str, level_bump: str) -> str:
-    """
-    Calculate the next version based on the given bump level with semver.
+    """Calculate the next version based on the given bump level with semver.
 
     :param current_version: The version the package has now.
     :param level_bump: The level of the version number that should be bumped.
@@ -235,8 +214,7 @@ def get_new_version(current_version: str, level_bump: str) -> str:
 
 @LoggedFunction(logger)
 def get_previous_version(version: str) -> Optional[str]:
-    """
-    Return the version prior to the given version.
+    """Return the version prior to the given version.
 
     :param version: A string with the version number.
     :return: A string with the previous version number.
@@ -260,8 +238,7 @@ def get_previous_version(version: str) -> Optional[str]:
 
 @LoggedFunction(logger)
 def set_new_version(new_version: str) -> bool:
-    """
-    Update the version number in each configured location.
+    """Update the version number in each configured location.
 
     :param new_version: The new version number as a string.
     :return: `True` if it succeeded.
@@ -274,9 +251,7 @@ def set_new_version(new_version: str) -> bool:
 
 
 def load_version_declarations() -> List[VersionDeclaration]:
-    """
-    Create the `VersionDeclaration` objects specified by the config file.
-    """
+    """Create the `VersionDeclaration` objects specified by the config file."""
     declarations = []
 
     def iter_fields(x):

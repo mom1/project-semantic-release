@@ -1,6 +1,3 @@
-import pytest
-
-from semantic_release.errors import UnknownCommitMessageStyleError
 from semantic_release.history import scipy_parser
 
 

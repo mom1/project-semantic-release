@@ -1,4 +1,7 @@
-import mock
+from functools import partial
+from textwrap import dedent
+from unittest import mock
+
 import pytest
 
 from semantic_release.changelog import markdown_changelog
@@ -8,6 +11,7 @@ from semantic_release.changelog.changelog import (
     get_changelog_sections,
 )
 from semantic_release.changelog.compare import compare_url, get_github_compare_url
+from semantic_release.changelog.handlers import add_mr_link_gitlab, get_hash_link
 
 from . import wrapped_config_get
 
@@ -51,8 +55,10 @@ def test_markdown_changelog():
 
 
 def test_markdown_changelog_gitlab():
-    with mock.patch("semantic_release.changelog.config.get", wrapped_config_get(hvcs="gitlab")):
-
+    settings = wrapped_config_get(hvcs="gitlab")
+    with mock.patch("semantic_release.changelog.changelog.config", settings), mock.patch(
+        "semantic_release.changelog.config", settings
+    ), mock.patch("semantic_release.settings.config", settings):
         assert markdown_changelog(
             "owner",
             "repo_name",
@@ -82,6 +88,155 @@ def test_markdown_changelog_gitlab():
         )
 
 
+def test_markdown_changelog_template_gitlab(mocker):
+    settings = wrapped_config_get(
+        hvcs="gitlab",
+        commit_analyzer="semantic_release.history.logs.get_commits",
+        changelog_components=[
+            "semantic_release.history.processing.changelog_processing",
+            "semantic_release.history.grouping.changelog_grouping",
+            "semantic_release.changelog.changelog.changelog_template",
+        ],
+    )
+    mocker.patch("semantic_release.changelog.changelog.config", settings)
+    mocker.patch("semantic_release.changelog.config", settings)
+    mocker.patch("semantic_release.settings.config", settings)
+    mocker.patch("semantic_release.changelog.handlers.config", settings)
+    mocker.patch("semantic_release.history.logs.get_commit_log", lambda *a, **kw: [("", "...")])
+    mocker.patch(
+        "semantic_release.changelog.handlers.get_repository_owner_and_name", return_value=["owner", "repo_name"]
+    )
+    mocker.patch("semantic_release.vcs_helpers.get_repository_owner_and_name", return_value=["owner", "repo_name"])
+    mocker.patch(
+        "semantic_release.changelog.handlers.add_mr_link_gitlab",
+        side_effect=partial(add_mr_link_gitlab, owner="owner", repo_name="repo_name"),
+    )
+    mocker.patch(
+        "semantic_release.changelog.handlers.get_hash_link",
+        side_effect=partial(get_hash_link, owner="owner", repo_name="repo_name"),
+    )
+
+    changelog = [
+        {
+            "commit": {
+                "long": "145",
+                "short": "145",
+            },
+            "tree": {
+                "long": "",
+                "short": "",
+            },
+            "author": {
+                "name": "test",
+                "email": "test@test.test",
+                "date": "2020-12-20",
+            },
+            "committer": {
+                "name": "test",
+                "email": "test@test.test",
+                "date": "2020-12-20",
+            },
+            "subject": "Add non-breaking super-feature (#1)",
+            "body": "",
+            "message": "feature: Add non-breaking super-feature (#1)",
+            "committer_date": "2020-12-20",
+            "type": "feature",
+            "scope": None,
+        },
+        {
+            "commit": {
+                "long": "12",
+                "short": "12",
+            },
+            "tree": {
+                "long": "",
+                "short": "",
+            },
+            "author": {
+                "name": "test",
+                "email": "test@test.test",
+                "date": "2020-12-20",
+            },
+            "committer": {
+                "name": "test",
+                "email": "test@test.test",
+                "date": "2020-12-20",
+            },
+            "subject": "Refactor super-feature",
+            "body": "",
+            "message": "feature: Refactor super-feature",
+            "committer_date": "2020-12-20",
+            "type": "refactor",
+            "scope": None,
+        },
+        {
+            "commit": {
+                "long": "134",
+                "short": "134",
+            },
+            "tree": {
+                "long": "",
+                "short": "",
+            },
+            "author": {
+                "name": "test",
+                "email": "test@test.test",
+                "date": "2020-12-20",
+            },
+            "committer": {
+                "name": "test",
+                "email": "test@test.test",
+                "date": "2020-12-20",
+            },
+            "subject": "Add super-feature",
+            "body": "",
+            "message": "feature: Add super-feature",
+            "committer_date": "2020-12-20",
+            "type": "feature",
+            "scope": None,
+        },
+        {
+            "commit": {
+                "long": "0",
+                "short": "0",
+            },
+            "tree": {
+                "long": "",
+                "short": "",
+            },
+            "author": {
+                "name": "test",
+                "email": "test@test.test",
+                "date": "2020-12-20",
+            },
+            "committer": {
+                "name": "test",
+                "email": "test@test.test",
+                "date": "2020-12-20",
+            },
+            "subject": "Document super-feature (#189)",
+            "body": "",
+            "message": "doc: Document super-feature (#189)",
+            "committer_date": "2020-12-20",
+            "type": "documentation",
+            "scope": None,
+        },
+    ]
+    assert markdown_changelog("owner", "repo_name", "0.0.0", changelog) == (
+        # Expected output with the default configuration
+        dedent(
+            """### Feature
+* Add non-breaking super-feature ([#1](https://gitlab.com/owner/repo_name/-/issues/1))\
+ ([`145`](https://gitlab.com/owner/repo_name/-/commit/145))
+* Add super-feature. ([`134`](https://gitlab.com/owner/repo_name/-/commit/134))
+
+### Documentation
+* Document super-feature ([#189](https://gitlab.com/owner/repo_name/-/issues/189))\
+ ([`0`](https://gitlab.com/owner/repo_name/-/commit/0))"""
+        )
+    )
+
+
 def test_changelog_table():
     assert changelog_table(
         "owner",
@@ -107,16 +262,6 @@ def test_should_not_output_heading():
         "repo_name",
         "1.0.1",
         {},
-    )
-
-
-def test_should_output_heading():
-    assert "## v1.0.1\n" in markdown_changelog(
-        "owner",
-        "repo_name",
-        "1.0.1",
-        {},
-        header=True,
     )
 
 
@@ -160,8 +305,10 @@ def test_get_changelog_sections():
     ],
 )
 def test_add_pr_link(message, hvcs, expected_output):
-
-    with mock.patch("semantic_release.changelog.config.get", wrapped_config_get(hvcs=hvcs)):
+    settings = wrapped_config_get(hvcs=hvcs)
+    with mock.patch("semantic_release.changelog.changelog.config", settings), mock.patch(
+        "semantic_release.changelog.config", settings
+    ), mock.patch("semantic_release.settings.config", settings):
 
         assert add_pr_link("owner", "name", message) == expected_output
 

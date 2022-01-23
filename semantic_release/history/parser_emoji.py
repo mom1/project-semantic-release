@@ -1,7 +1,5 @@
-"""Commit parser which looks for emojis to determine the type of commit"""
+"""Commit parser which looks for emojis to determine the type of commit."""
 import logging
-import re
-from typing import Optional
 
 from ..helpers import LoggedFunction
 from ..settings import config
@@ -14,8 +12,7 @@ logger = logging.getLogger(__name__)
 def parse_commit_message(
     message: str,
 ) -> ParsedCommit:
-    """
-    Parse a commit using an emoji in the subject line.
+    """Parse a commit using an emoji in the subject line.
 
     When multiple emojis are encountered, the one with the highest bump
     level is used. If there are multiple emojis on the same level, the
@@ -34,9 +31,9 @@ def parse_commit_message(
 
     subject = message.split("\n")[0]
 
-    major = config.get("major_emoji").split(",")
-    minor = config.get("minor_emoji").split(",")
-    patch = config.get("patch_emoji").split(",")
+    major = config.get("major_emoji")
+    minor = config.get("minor_emoji")
+    patch = config.get("patch_emoji")
     all_emojis = major + minor + patch
 
     # Loop over emojis from most important to least important

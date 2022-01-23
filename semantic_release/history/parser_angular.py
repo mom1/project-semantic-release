@@ -1,5 +1,4 @@
-"""
-Angular commit style parser
+"""Angular commit style parser.
 
 https://github.com/angular/angular/blob/master/CONTRIBUTING.md#-commit-message-guidelines
 """
@@ -26,8 +25,7 @@ LEVEL_BUMPS = {"no-release": 0, "patch": 1, "minor": 2, "major": 3}
 
 @LoggedFunction(logger)
 def parse_commit_message(message: str) -> ParsedCommit:
-    """
-    Parse a commit message according to the angular commit guidelines specification.
+    """Parse a commit message according to the angular commit guidelines specification.
 
     :param message: A string of a commit message.
     :return: A tuple of (level to bump, type of change, scope of change, a tuple with descriptions)
@@ -35,9 +33,9 @@ def parse_commit_message(message: str) -> ParsedCommit:
     """
 
     # loading these are here to make it easier to mock in tests
-    allowed_types = config.get("parser_angular_allowed_types").split(",")
-    minor_types = config.get("parser_angular_minor_types").split(",")
-    patch_types = config.get("parser_angular_patch_types").split(",")
+    allowed_types = config.get("parser_angular_allowed_types")
+    minor_types = config.get("parser_angular_minor_types")
+    patch_types = config.get("parser_angular_patch_types")
     re_parser = re.compile(
         r"(?P<type>" + "|".join(allowed_types) + ")"
         r"(?:\((?P<scope>[^\n]+)\))?"
@@ -58,9 +56,9 @@ def parse_commit_message(message: str) -> ParsedCommit:
     parsed_type = parsed.group("type")
 
     if parsed_text:
-        descriptions = parse_paragraphs(parsed_text)
+        descriptions = [i.replace("\n", " ") for i in parse_paragraphs(parsed_text)]
     else:
-        descriptions = list()
+        descriptions = []
     # Insert the subject before the other paragraphs
     descriptions.insert(0, parsed_subject)
 

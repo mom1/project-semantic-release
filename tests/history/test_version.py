@@ -1,7 +1,7 @@
 from pathlib import Path
 from textwrap import dedent
+from unittest import mock
 
-import mock
 import pytest
 
 import semantic_release
@@ -39,13 +39,13 @@ def test_current_version_should_return_correct_version():
 
 @mock.patch("semantic_release.history.get_last_version", return_value="last_version")
 def test_current_version_should_return_git_version(mock_last_version):
-    assert "last_version" == get_current_version_by_tag()
+    assert get_current_version_by_tag() == "last_version"
 
 
-@mock.patch("semantic_release.history.config.get", wrapped_config_get(version_source="tag"))
+@mock.patch("semantic_release.history.config", wrapped_config_get(version_source="tag"))
 @mock.patch("semantic_release.history.get_last_version", return_value=None)
 def test_current_version_should_return_default_version(mock_last_version):
-    assert "0.0.0" == get_current_version()
+    assert get_current_version() == "0.0.0"
 
 
 class TestGetPreviousVersion:
@@ -88,7 +88,7 @@ class TestGetNewVersion:
 
 
 @mock.patch(
-    "semantic_release.history.config.get",
+    "semantic_release.history.config",
     wrapped_config_get(version_variable="my_version_path:my_version_var", version_toml=""),
 )
 def test_set_version(tmp_cwd):
@@ -251,11 +251,11 @@ class TestVersionPattern:
                     name = "my-package"
                     version = "0.1.0"
                     description = "A super package"
-                    
+
                     [build-system]
                     requires = ["poetry-core>=1.0.0"]
                     build-backend = "poetry.core.masonry.api"
-                    
+
                     [tool.semantic_release]
                     version_toml = "pyproject.toml:tool.poetry.version"
                     """
@@ -266,11 +266,11 @@ class TestVersionPattern:
                     name = "my-package"
                     version = "-"
                     description = "A super package"
-                    
+
                     [build-system]
                     requires = ["poetry-core>=1.0.0"]
                     build-backend = "poetry.core.masonry.api"
-                    
+
                     [tool.semantic_release]
                     version_toml = "pyproject.toml:tool.poetry.version"
                     """
@@ -291,80 +291,80 @@ class TestVersionPattern:
 @pytest.mark.parametrize(
     "params",
     [
-        dict(
-            pyproject="",
-            error=True,
-        ),
-        dict(
-            pyproject="""\
+        {
+            "pyproject": "",
+            "error": True,
+        },
+        {
+            "pyproject": """\
                         [tool.semantic_release]
                         """,
-            error=True,
-        ),
-        dict(
-            pyproject="""\
+            "error": True,
+        },
+        {
+            "pyproject": """\
                         [tool.semantic_release]
                         version_variable = "path:__version__"
                         """,
-            patterns=[
+            "patterns": [
                 (Path("path"), r'__version__ *[:=] *["\'](\d+\.\d+(?:\.\d+)?)["\']'),
             ],
-        ),
-        dict(
-            pyproject="""\
+        },
+        {
+            "pyproject": """\
                         [tool.semantic_release]
                         version_variable = "path1:var1,path2:var2"
                         """,
-            patterns=[
+            "patterns": [
                 (Path("path1"), r'var1 *[:=] *["\'](\d+\.\d+(?:\.\d+)?)["\']'),
                 (Path("path2"), r'var2 *[:=] *["\'](\d+\.\d+(?:\.\d+)?)["\']'),
             ],
-        ),
-        dict(
-            pyproject="""\
+        },
+        {
+            "pyproject": """\
                         [tool.semantic_release]
                         version_variable = [
                             "path1:var1",
                             "path2:var2"
                         ]
                         """,
-            patterns=[
+            "patterns": [
                 (Path("path1"), r'var1 *[:=] *["\'](\d+\.\d+(?:\.\d+)?)["\']'),
                 (Path("path2"), r'var2 *[:=] *["\'](\d+\.\d+(?:\.\d+)?)["\']'),
             ],
-        ),
-        dict(
-            pyproject="""\
+        },
+        {
+            "pyproject": """\
                         [tool.semantic_release]
                         version_pattern = "path:pattern"
                         """,
-            patterns=[
+            "patterns": [
                 (Path("path"), "pattern"),
             ],
-        ),
-        dict(
-            pyproject="""\
+        },
+        {
+            "pyproject": """\
                         [tool.semantic_release]
                         version_pattern = "path1:pattern1,path2:pattern2"
                         """,
-            patterns=[
+            "patterns": [
                 (Path("path1"), "pattern1"),
                 (Path("path2"), "pattern2"),
             ],
-        ),
-        dict(
-            pyproject="""\
+        },
+        {
+            "pyproject": """\
                         [tool.semantic_release]
                         version_pattern = [
                             "path1:pattern1",
                             "path2:pattern2"
                         ]
                         """,
-            patterns=[
+            "patterns": [
                 (Path("path1"), "pattern1"),
                 (Path("path2"), "pattern2"),
             ],
-        ),
+        },
     ],
 )
 def test_load_version_patterns(tmp_cwd, monkeypatch, params):
@@ -378,7 +378,7 @@ def test_load_version_patterns(tmp_cwd, monkeypatch, params):
     monkeypatch.setattr(
         semantic_release.history,
         "config",
-        semantic_release.settings._config(),
+        semantic_release.settings._config(tmp_cwd),
     )
 
     if "error" in params:

@@ -8,7 +8,7 @@
 {{/ previous_version }}
 
 {{# commits}}
-*{{# scope}} **{{scope}}:**{{/scope}} {{subject}} [`{{commit.short}}`](https://github.com/{{owner}}/{{repo_name}}/commit/{{commit.short}})
+*{{# scope}} **{{scope}}:**{{/scope}} {{subject}} [`{{commit.short}}`]({{# get_hash_link}}{{commit.long}}{{/get_hash_link}})
 {{#body}}
 {{{body}}}
 {{/body}}

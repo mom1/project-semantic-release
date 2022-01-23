@@ -33,7 +33,7 @@ def subject(request):
             "MAINT: remove debugging import",
         ),
         # empty body
-        list(),
+        [],
         # formatted body
         (
             """Bumps [sphinx](https://github.com/sphinx-doc/sphinx) from 3.5.3 to 4.1.1.

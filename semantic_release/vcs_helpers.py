@@ -1,8 +1,8 @@
-"""VCS Helpers
-"""
+"""VCS Helpers."""
 import logging
 import os
 import re
+from contextlib import suppress
 from datetime import date
 from functools import wraps
 from pathlib import Path, PurePath
@@ -18,10 +18,8 @@ from .errors import GitError, HvcsRepoParseError
 from .helpers import LoggedFunction
 from .settings import config
 
-try:
+with suppress(InvalidGitRepositoryError):
     repo = Repo(".", search_parent_directories=True)
-except InvalidGitRepositoryError:
-    pass
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +37,7 @@ def check_repo(func):
 
 
 def get_formatted_tag(version):
-    """Get the version, formatted with `tag_format` config option"""
+    """Get the version, formatted with `tag_format` config option."""
     tag_format = config.get("tag_format")
     return tag_format.format(version=version)
 
@@ -63,8 +61,7 @@ def get_commit_log(from_rev=None):
 @check_repo
 @LoggedFunction(logger)
 def get_last_version(skip_tags=None) -> Optional[str]:
-    """
-    Find the latest version using repo tags.
+    """Find the latest version using repo tags.
 
     :return: A string containing a version number.
     """
@@ -86,8 +83,7 @@ def get_last_version(skip_tags=None) -> Optional[str]:
 @check_repo
 @LoggedFunction(logger)
 def get_version_from_tag(tag_name: str) -> Optional[str]:
-    """
-    Get the git commit hash corresponding to a tag name.
+    """Get the git commit hash corresponding to a tag name.
 
     :param tag_name: Name of the git tag (i.e. 'v1.0.0')
     :return: sha1 hash of the commit
@@ -101,8 +97,7 @@ def get_version_from_tag(tag_name: str) -> Optional[str]:
 @check_repo
 @LoggedFunction(logger)
 def get_repository_owner_and_name() -> Tuple[str, str]:
-    """
-    Check the 'origin' remote to get the owner and name of the remote repository.
+    """Check the 'origin' remote to get the owner and name of the remote repository.
 
     :return: A tuple of the owner and name.
     """
@@ -128,8 +123,7 @@ def get_repository_owner_and_name() -> Tuple[str, str]:
 
 @check_repo
 def get_current_head_hash() -> str:
-    """
-    Get the commit hash of the current HEAD.
+    """Get the commit hash of the current HEAD.
 
     :return: The commit hash.
     """
@@ -139,8 +133,7 @@ def get_current_head_hash() -> str:
 @check_repo
 @LoggedFunction(logger)
 def commit_new_version(version: str):
-    """
-    Commit the file containing the version number variable.
+    """Commit the file containing the version number variable.
 
     The commit message will be generated from the configured template.
 
@@ -172,8 +165,7 @@ def commit_new_version(version: str):
 @check_repo
 @LoggedFunction(logger)
 def update_changelog_file(version: str, content_to_add: str):
-    """
-    Update changelog file with changelog for the release.
+    """Update changelog file with changelog for the release.
 
     :param version: The release version number, as a string.
     :param content_to_add: The release notes for the version.
@@ -211,8 +203,7 @@ def update_changelog_file(version: str, content_to_add: str):
 @check_repo
 @LoggedFunction(logger)
 def tag_new_version(version: str):
-    """
-    Create a new tag with the version number, prefixed with v by default.
+    """Create a new tag with the version number, prefixed with v by default.
 
     :param version: The version number used in the tag as a string.
     """
@@ -229,8 +220,7 @@ def push_new_version(
     branch: str = "master",
     domain: str = "github.com",
 ):
-    """
-    Run git push and git push --tags.
+    """Run git push and git push --tags.
 
     :param auth_token: Authentication token used to push.
     :param owner: Organisation or user that owns the repository.
@@ -263,8 +253,7 @@ def push_new_version(
 @check_repo
 @LoggedFunction(logger)
 def checkout(branch: str):
-    """
-    Check out the given branch in the local repository.
+    """Check out the given branch in the local repository.
 
     :param branch: The branch to checkout.
     """

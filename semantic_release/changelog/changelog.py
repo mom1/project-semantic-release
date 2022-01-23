@@ -12,9 +12,9 @@ from .compare import compare_url
 
 
 def add_pr_link(owner: str, repo_name: str, message: str) -> str:
-    """
-    GitHub release notes automagically link to the PR, but changelog markdown
-    doesn't. Replace (#123) at the end of a message with a markdown link.
+    """GitHub release notes automagically link to the PR, but changelog markdown doesn't.
+
+    Replace (#123) at the end of a message with a markdown link.
     """
 
     pr_pattern = re.compile(r"\s+\(#(\d{1,8})\)$")
@@ -34,18 +34,17 @@ def add_pr_link(owner: str, repo_name: str, message: str) -> str:
 
 
 def get_changelog_sections(changelog: dict, changelog_sections: list) -> Iterable[str]:
-    """Generator which yields each changelog section to be included"""
-
+    """Generator which yields each changelog section to be included."""
     included_sections = config.get("changelog_sections")
-    included_sections = [s.strip() for s in included_sections.split(",")]
 
     for section in included_sections:
-        if section in changelog and changelog[section]:
+        section = section.strip()
+        if changelog.get(section):
             yield section
 
 
 def get_hash_link(owner: str, repo_name: str, hash_: str) -> str:
-    """Generate the link for commit hash"""
+    """Generate the link for commit hash."""
     url = (
         f"https://{Gitlab.domain()}/{owner}/{repo_name}/-/commit/{hash_}"
         if config.get("hvcs") == "gitlab"
@@ -109,7 +108,7 @@ def changelog_template(
     git_head_next = ""
     if not next_release:
         # Calculate the new version
-        level_bump = evaluate_version_bump(version, config.get("force_level"))
+        level_bump = evaluate_version_bump(version or "", config.get("force_level"))
         next_release = get_new_version(version, level_bump)
 
     next_git_tag = get_formatted_tag(next_release)
@@ -125,7 +124,7 @@ def changelog_template(
     except ValueError:
         pass
 
-    template_path = config.get("changelog_template", Path(__file__).parent.parent / "templates/template.tpl")
+    template_path: str = config.get("changelog_template", str(Path(__file__).parent.parent / "templates/template.tpl"))
 
     file = Path(template_path)
     template = ""

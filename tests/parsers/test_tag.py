@@ -45,7 +45,7 @@ def test_parser_return_subject_from_commit_message():
 
 
 def test_parser_return_text_from_commit_message():
-    commit = ":nut_and_bolt: Fix regex in an parser\n\n{}".format(text)
+    commit = f":nut_and_bolt: Fix regex in an parser\n\n{text}"
     assert tag_parser(commit)[3][1] == text
 
 
