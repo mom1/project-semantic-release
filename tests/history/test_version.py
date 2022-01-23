@@ -42,7 +42,7 @@ def test_current_version_should_return_git_version(mock_last_version):
     assert get_current_version_by_tag() == "last_version"
 
 
-@mock.patch("semantic_release.history.config.get", wrapped_config_get(version_source="tag"))
+@mock.patch("semantic_release.history.config", wrapped_config_get(version_source="tag"))
 @mock.patch("semantic_release.history.get_last_version", return_value=None)
 def test_current_version_should_return_default_version(mock_last_version):
     assert get_current_version() == "0.0.0"
@@ -88,7 +88,7 @@ class TestGetNewVersion:
 
 
 @mock.patch(
-    "semantic_release.history.config.get",
+    "semantic_release.history.config",
     wrapped_config_get(version_variable="my_version_path:my_version_var", version_toml=""),
 )
 def test_set_version(tmp_cwd):
@@ -378,7 +378,7 @@ def test_load_version_patterns(tmp_cwd, monkeypatch, params):
     monkeypatch.setattr(
         semantic_release.history,
         "config",
-        semantic_release.settings._config(),
+        semantic_release.settings._config(tmp_cwd),
     )
 
     if "error" in params:

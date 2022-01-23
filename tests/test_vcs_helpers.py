@@ -80,10 +80,9 @@ def test_first_commit_is_not_initial_commit():
     ],
 )
 def test_add_and_commit(mock_git, mocker, params):
-    mocker.patch(
-        "semantic_release.vcs_helpers.config.get",
-        wrapped_config_get(**params["config"]),
-    )
+    settings = wrapped_config_get(**params["config"])
+    mocker.patch("semantic_release.vcs_helpers.config", settings)
+    mocker.patch("semantic_release.history.config", settings)
 
     commit_new_version(params["version"])
 
@@ -94,10 +93,7 @@ def test_add_and_commit(mock_git, mocker, params):
 
 
 def test_tag_new_version(mock_git, mocker):
-    mocker.patch(
-        "semantic_release.vcs_helpers.config.get",
-        return_value="ver{version}",
-    )
+    mocker.patch("semantic_release.vcs_helpers.config", wrapped_config_get(tag_format="ver{version}"))
     tag_new_version("1.0.0")
     mock_git.tag.assert_called_with("-a", "ver1.0.0", m="ver1.0.0")
 
@@ -274,8 +270,8 @@ def test_get_current_head_hash(mocker):
     assert get_current_head_hash() == "commit-hash"
 
 
-@mock.patch("semantic_release.vcs_helpers.config.get", return_value="gitlab")
-def test_push_should_not_print_auth_token(mock_gitlab, mock_git):
+@mock.patch("semantic_release.vcs_helpers.config", wrapped_config_get(hvcs="gitlab"))
+def test_push_should_not_print_auth_token(mock_git):
     mock_git.configure_mock(**{"push.side_effect": GitCommandError("auth--token", 1, b"auth--token", b"auth--token")})
     with pytest.raises(GitError) as excinfo:
         push_new_version(auth_token="auth--token")

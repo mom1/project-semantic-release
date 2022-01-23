@@ -1,6 +1,6 @@
 from semantic_release.dist import build_dists, should_build, should_remove_dist
 
-from . import pytest
+from . import pytest, wrapped_config_get
 
 
 @pytest.mark.parametrize(
@@ -8,7 +8,7 @@ from . import pytest
     ["sdist bdist_wheel", "sdist", "bdist_wheel", "sdist bdist_wheel custom_cmd"],
 )
 def test_build_command(mocker, commands):
-    mocker.patch("semantic_release.dist.config.get", lambda *a: commands)
+    mocker.patch("semantic_release.dist.config", wrapped_config_get(build_command=commands))
     mock_run = mocker.patch("semantic_release.dist.run")
     build_dists()
     mock_run.assert_called_once_with(commands)
@@ -110,7 +110,10 @@ def test_build_command(mocker, commands):
     ],
 )
 def test_should_build(config, expected, mocker):
-    mocker.patch("semantic_release.cli.config.get", lambda key: config.get(key))
+    settings = wrapped_config_get(**config)
+    mocker.patch("semantic_release.cli.config", settings)
+    mocker.patch("semantic_release.dist.config", settings)
+    mocker.patch("semantic_release.repository.config", settings)
     assert should_build() == expected
 
 
@@ -190,5 +193,8 @@ def test_should_build(config, expected, mocker):
     ],
 )
 def test_should_remove_dist(config, expected, mocker):
-    mocker.patch("semantic_release.cli.config.get", lambda key: config.get(key))
+    settings = wrapped_config_get(**config)
+    mocker.patch("semantic_release.cli.config", settings)
+    mocker.patch("semantic_release.dist.config", settings)
+    mocker.patch("semantic_release.repository.config", settings)
     assert should_remove_dist() == expected

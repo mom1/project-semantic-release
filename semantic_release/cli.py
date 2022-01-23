@@ -192,7 +192,7 @@ def changelog(*, unreleased=False, noop=False, post=False, **_):
 
     owner, name = get_repository_owner_and_name()
     # print is used to keep the changelog on stdout, separate from log messages
-    print(markdown_changelog(owner, name, current_version, log, header=False))
+    print(markdown_changelog(owner, name, current_version, log))
 
     # Post changelog to HVCS if enabled
     if not noop and post:
@@ -202,7 +202,7 @@ def changelog(*, unreleased=False, noop=False, post=False, **_):
                 owner,
                 name,
                 current_version,
-                markdown_changelog(owner, name, current_version, log, header=False),
+                markdown_changelog(owner, name, current_version, log),
             )
         else:
             logger.error("Missing token: cannot post changelog to HVCS")
@@ -245,7 +245,6 @@ def publish(retry: bool = False, noop: bool = False, **kwargs):
             name,
             new_version,
             log,
-            header=False,
             previous_version=current_version,
         )
 
@@ -330,7 +329,7 @@ def merge_request(
     return post_pull_request(
         owner=owner,
         repository=name,
-        changelog=markdown_changelog(owner, name, get_current_version(), log, header=False),
+        changelog=markdown_changelog(owner, name, get_current_version(), log),
         title=mr_title,
         source_branch=source_branch,
         target_branch=target_branch,

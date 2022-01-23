@@ -35,7 +35,6 @@ def add_pr_link(owner: str, repo_name: str, message: str) -> str:
 
 def get_changelog_sections(changelog: dict, changelog_sections: list) -> Iterable[str]:
     """Generator which yields each changelog section to be included."""
-
     included_sections = config.get("changelog_sections")
 
     for section in included_sections:
@@ -109,7 +108,7 @@ def changelog_template(
     git_head_next = ""
     if not next_release:
         # Calculate the new version
-        level_bump = evaluate_version_bump(version, config.get("force_level"))
+        level_bump = evaluate_version_bump(version or "", config.get("force_level"))
         next_release = get_new_version(version, level_bump)
 
     next_git_tag = get_formatted_tag(next_release)

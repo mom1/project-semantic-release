@@ -173,7 +173,7 @@ else:
         """
         return msg and emoji.emojize(msg, use_aliases=True) or msg
 
-    @ReSub(r"(:(\w+):)\s")
+    @ReSub(r"(:([\w_]+):)\s?")
     def remove_emoji(msg: str, pattern: Pattern[str]):
         """remove_emoji.
 
@@ -190,7 +190,10 @@ else:
 
     @ReSub("", **dict(zip(("owner", "repo_name"), get_repository_owner_and_name())))
     def get_hash_link(msg: str, _, render, owner="", repo_name="") -> str:
-        """Generate the link for commit hash."""
+        """Generate the link for commit hash.
+
+        Designed to run in a template
+        """
         hash_ = render(msg)
         url = (
             f"https://{Gitlab.domain()}/{owner}/{repo_name}/-/commit/{hash_}"

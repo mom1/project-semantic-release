@@ -20,6 +20,7 @@ from .parser_angular import parse_commit_message as angular_parser  # noqa isort
 from .parser_emoji import parse_commit_message as emoji_parser  # noqa isort:skip
 from .parser_scipy import parse_commit_message as scipy_parser  # noqa isort:skip
 from .parser_tag import parse_commit_message as tag_parser  # noqa isort:skip
+from .parser_gitmoji import gitmoji_parser  # noqa isort:skip
 
 logger = logging.getLogger(__name__)
 

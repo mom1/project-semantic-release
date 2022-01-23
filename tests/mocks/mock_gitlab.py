@@ -134,7 +134,7 @@ class _GitlabProject:
 def mock_gitlab(status="success"):
     mocks = [
         mock.patch("os.environ", {"GL_TOKEN": "token"}),
-        mock.patch("semantic_release.hvcs.config.get", wrapped_config_get(hvcs="gitlab")),
+        mock.patch("semantic_release.hvcs.config", wrapped_config_get(hvcs="gitlab")),
         mock.patch("gitlab.Gitlab.auth"),
         mock.patch(
             "gitlab.v4.objects.ProjectManager",

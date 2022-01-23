@@ -17,17 +17,11 @@ class RepositoryTests(TestCase):
     def test_upload_enabled(self):
         self.assertTrue(ArtifactRepo.upload_enabled())
 
-    @mock.patch(
-        "semantic_release.repository.config.get",
-        wrapped_config_get(upload_to_repository=False),
-    )
+    @mock.patch("semantic_release.repository.config", wrapped_config_get(upload_to_repository=False))
     def test_upload_enabled_with_upload_to_repository_false(self):
         self.assertFalse(ArtifactRepo.upload_enabled())
 
-    @mock.patch(
-        "semantic_release.repository.config.get",
-        wrapped_config_get(upload_to_pypi=False),
-    )
+    @mock.patch("semantic_release.repository.config", wrapped_config_get(upload_to_pypi=False))
     def test_upload_enabled_with_upload_to_pypi_false(self):
         self.assertFalse(ArtifactRepo.upload_enabled())
 
@@ -103,6 +97,7 @@ class RepositoryTests(TestCase):
             "REPOSITORY_PASSWORD": "repo-password",
         },
     )
+    @mock.patch("semantic_release.repository.config", wrapped_config_get())
     def test_repo_prefers_repository_over_pypi(self):
         repo = ArtifactRepo(Path("dist"))
         self.assertEqual(repo.username, "repo-username")
@@ -114,18 +109,15 @@ class RepositoryTests(TestCase):
         self.assertEqual(repo.dists, ["custom-dist/*"])
 
     @mock.patch.object(ArtifactRepo, "_handle_credentials_init")
-    @mock.patch(
-        "semantic_release.repository.config.get",
-        wrapped_config_get(dist_glob_patterns="*.tar.gz,*.whl"),
-    )
+    @mock.patch("semantic_release.repository.config", wrapped_config_get(dist_glob_patterns=["*.tar.gz", "*.whl"]))
     def test_repo_with_custom_dist_globs(self, mock_handle_creds):
         repo = ArtifactRepo(Path("dist"))
         self.assertEqual(repo.dists, ["dist/*.tar.gz", "dist/*.whl"])
 
     @mock.patch.object(ArtifactRepo, "_handle_credentials_init")
     @mock.patch(
-        "semantic_release.repository.config.get",
-        wrapped_config_get(upload_to_pypi_glob_patterns="*.tar.gz,*.whl"),
+        "semantic_release.repository.config",
+        wrapped_config_get(upload_to_pypi_glob_patterns=["*.tar.gz", "*.whl"]),
     )
     def test_repo_with_custom_pypi_globs(self, mock_handle_creds):
         repo = ArtifactRepo(Path("dist"))
@@ -133,7 +125,7 @@ class RepositoryTests(TestCase):
 
     @mock.patch.object(ArtifactRepo, "_handle_credentials_init")
     @mock.patch(
-        "semantic_release.repository.config.get",
+        "semantic_release.repository.config",
         wrapped_config_get(repository="testpypi"),
     )
     def test_repo_with_repo_name_testpypi(self, mock_handle_creds):
@@ -142,7 +134,7 @@ class RepositoryTests(TestCase):
 
     @mock.patch.object(ArtifactRepo, "_handle_credentials_init")
     @mock.patch(
-        "semantic_release.repository.config.get",
+        "semantic_release.repository.config",
         wrapped_config_get(repository="invalid"),
     )
     def test_raises_error_when_repo_name_invalid(self, mock_handle_creds):
@@ -152,7 +144,7 @@ class RepositoryTests(TestCase):
 
     @mock.patch.object(ArtifactRepo, "_handle_credentials_init")
     @mock.patch(
-        "semantic_release.repository.config.get",
+        "semantic_release.repository.config",
         wrapped_config_get(repository_url="https://custom-repo"),
     )
     def test_repo_with_custom_repo_url(self, mock_handle_creds):
@@ -161,8 +153,8 @@ class RepositoryTests(TestCase):
 
     @mock.patch("semantic_release.repository.twine_upload")
     @mock.patch(
-        "semantic_release.repository.config.get",
-        wrapped_config_get(dist_glob_patterns="*.tar.gz,*.whl", repository_url="https://custom-repo"),
+        "semantic_release.repository.config",
+        wrapped_config_get(dist_glob_patterns=["*.tar.gz", "*.whl"], repository_url="https://custom-repo"),
     )
     @mock.patch.dict(
         "os.environ",

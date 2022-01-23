@@ -7,7 +7,7 @@ from semantic_release.errors import ImproperConfigurationError
 from semantic_release.history import parser_angular
 from semantic_release.settings import _config, import_from_settings
 
-from . import mock, reset_config
+from . import mock, reset_config, wrapped_config_get
 
 assert reset_config
 
@@ -26,10 +26,8 @@ class ConfigTests(TestCase):
             "semantic_release/__init__.py:__version__",
         )
 
-    @mock.patch("semantic_release.settings.getcwd", return_value=temp_dir)
-    def test_defaults(self, mock_getcwd):
+    def test_defaults(self):
         config = _config()
-        mock_getcwd.assert_called_once_with()
         self.assertEqual(config.get("minor_tag"), ":sparkles:")
         self.assertEqual(config.get("fix_tag"), ":nut_and_bolt:")
         self.assertFalse(config.get("patch_without_tag"))
@@ -45,8 +43,7 @@ class ConfigTests(TestCase):
         self.assertEqual(config.get("repository_user_var"), "REPOSITORY_USERNAME")
         self.assertEqual(config.get("repository_pass_var"), "REPOSITORY_PASSWORD")
 
-    @mock.patch("semantic_release.settings.getcwd", return_value=temp_dir)
-    def test_toml_override(self, mock_getcwd):
+    def test_toml_override(self):
         # create temporary toml config file
         dummy_conf_path = os.path.join(temp_dir, "pyproject.toml")
         os.makedirs(os.path.dirname(dummy_conf_path), exist_ok=True)
@@ -61,8 +58,7 @@ foo = "bar"
         with open(dummy_conf_path, "w") as dummy_conf_file:
             dummy_conf_file.write(toml_conf_content)
 
-        config = _config()
-        mock_getcwd.assert_called_once_with()
+        config = _config(temp_dir)
         self.assertEqual(config.get("hvcs"), "github")
         self.assertEqual(config.get("upload_to_repository"), False)
         self.assertEqual(config.get("version_source"), "tag")
@@ -71,31 +67,7 @@ foo = "bar"
         # delete temporary toml config file
         os.remove(dummy_conf_path)
 
-    @mock.patch("semantic_release.settings.logger.warning")
-    @mock.patch("semantic_release.settings.getcwd", return_value=temp_dir)
-    def test_no_raise_toml_error(self, mock_getcwd, mock_warning):
-        # create temporary toml config file
-        dummy_conf_path = os.path.join(temp_dir, "pyproject.toml")
-        bad_toml_conf_content = """\
-        TITLE OF BAD TOML
-        [section]
-        key = # BAD BECAUSE NO VALUE
-        """
-        os.makedirs(os.path.dirname(dummy_conf_path), exist_ok=True)
-
-        with open(dummy_conf_path, "w") as dummy_conf_file:
-            dummy_conf_file.write(bad_toml_conf_content)
-
-        _ = _config()
-        mock_getcwd.assert_called_once_with()
-        mock_warning.assert_called_once_with(
-            'Could not decode pyproject.toml: Invalid key "TITLE OF BAD TOML" at line 1 col 25'
-        )
-        # delete temporary toml config file
-        os.remove(dummy_conf_path)
-
-    @mock.patch("semantic_release.settings.getcwd", return_value=temp_dir)
-    def test_toml_no_psr_section(self, mock_getcwd):
+    def test_toml_no_psr_section(self):
         # create temporary toml config file
         dummy_conf_path = os.path.join(temp_dir, "pyproject.toml")
         toml_conf_content = dedent(
@@ -110,23 +82,19 @@ foo = "bar"
             dummy_conf_file.write(toml_conf_content)
 
         config = _config()
-        mock_getcwd.assert_called_once_with()
         self.assertEqual(config.get("hvcs"), "github")
         # delete temporary toml config file
         os.remove(dummy_conf_path)
 
-    @mock.patch("semantic_release.settings.config.get", lambda *_: "nonexistent.parser")
+    @mock.patch("semantic_release.settings.config", wrapped_config_get(commit_parser="nonexistent.parser"))
     def test_current_commit_parser_should_raise_error_if_parser_module_do_not_exist(
         self,
     ):
-        self.assertRaises(ImproperConfigurationError, import_from_settings("commit_parser"))
+        self.assertRaises(ImproperConfigurationError, lambda: import_from_settings("commit_parser"))
 
-    @mock.patch(
-        "semantic_release.settings.config.get",
-        lambda *_: "semantic_release.not_a_parser",
-    )
+    @mock.patch("semantic_release.settings.config", wrapped_config_get(commit_parser="semantic_release.not_a_parser"))
     def test_current_commit_parser_should_raise_error_if_parser_do_not_exist(self):
-        self.assertRaises(ImproperConfigurationError, import_from_settings("commit_parser"))
+        self.assertRaises(ImproperConfigurationError, lambda: import_from_settings("commit_parser"))
 
     def test_current_commit_parser_should_return_correct_parser(self):
-        self.assertEqual(import_from_settings("commit_parser")(), parser_angular.parse_commit_message)
+        self.assertEqual(import_from_settings("commit_parser"), parser_angular.parse_commit_message)

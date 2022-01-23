@@ -10,16 +10,21 @@ from .helpers import import_path
 logger = logging.getLogger(__name__)
 
 
-def _config():
+def _config(root_path=None):
     config_ = Dynaconf(
+        root_path=root_path,
         enviromnets=False,
         envvar_prefix="PSR",
         settings_files=["setup.cfg", "pyproject.toml", ".secrets.toml"],
     )
 
     config_.configure(LOADERS_FOR_DYNACONF=["semantic_release.cfg_loader", "dynaconf.loaders.env_loader"])
-    result = Dynaconf(enviromnets=False, envvar_prefix="PSR")
-    result.configure(**{**config_.SEMANTIC_RELEASE.to_dict(), **config_.TOOL.SEMANTIC_RELEASE.to_dict()})
+    result = Dynaconf(enviromnets=False, envvar_prefix="PSR", root_path=root_path)
+    data = {**config_.SEMANTIC_RELEASE.to_dict()}
+    tool = config_.get("TOOL", {}).get("SEMANTIC_RELEASE")
+    if tool:
+        data.update(tool.to_dict())
+    result.configure(**data)
     return result
 
 
@@ -35,7 +40,8 @@ def import_from_settings(settings_name: str) -> Any:
                 new_val.append(import_path(v))
             else:
                 break
-        val = config[settings_name] = new_val
+        else:
+            val = config[settings_name] = new_val
     elif val and isinstance(val, str):
         val = config[settings_name] = import_path(val)
     return val

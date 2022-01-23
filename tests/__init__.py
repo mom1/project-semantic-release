@@ -22,6 +22,10 @@ def reset_config():
 
 
 def wrapped_config_get(**kwargs):
+    from dynaconf import Dynaconf
+
     from semantic_release.settings import config
 
-    return lambda *args: {**config, **kwargs}.get(*args)
+    mocked_settings = Dynaconf(enviromnets=False, envvar_prefix="PSR")
+    mocked_settings.configure(**{**config.as_dict(), **kwargs})
+    return mocked_settings
