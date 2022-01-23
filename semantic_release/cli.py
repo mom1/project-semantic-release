@@ -41,6 +41,7 @@ from .vcs_helpers import (
 )
 
 logger = logging.getLogger("semantic_release")
+sys.path.append(os.getcwd())
 
 TOKEN_VARS = [
     "github_token_var",
