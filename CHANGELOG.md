@@ -1,5 +1,9 @@
 <!--next-version-placeholder-->
 
+## v1.0.3 (2022-01-23)
+### Fix
+* Added current dir to path ([`38cba1c`](https://github.com/mom1/project-semantic-release/commit/38cba1cba6fd35652b85104a428f5da66684b6e1))
+
 ## v1.0.2 (2022-01-23)
 ### Fix
 * Added `--define` argument for `merge_request` command ([`c11fcce`](https://github.com/mom1/project-semantic-release/commit/c11fcce6b66bfbc90f3c845c90ca98285240d38c))
