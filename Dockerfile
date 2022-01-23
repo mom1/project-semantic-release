@@ -53,4 +53,4 @@ RUN poetry install --no-dev -E emoji --no-interaction --no-ansi \
 
 RUN semantic-release --help
 
-ENTRYPOINT ["tini", "--", "/semantic-release/action.sh"]
+CMD ["tini", "--", "/semantic-release/action.sh"]
