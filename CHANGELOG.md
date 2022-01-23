@@ -1,5 +1,12 @@
 <!--next-version-placeholder-->
 
+## v1.0.0 (2022-01-23)
+### Feature
+* Dynaconf for manage settings ([`0c0fce9`](https://github.com/mom1/project-semantic-release/commit/0c0fce9cfcfc9bac8bcd2e7ac9875f81ea9f9005))
+
+### Breaking
+* Removed functions that return the current setting value as a module import ([`0c0fce9`](https://github.com/mom1/project-semantic-release/commit/0c0fce9cfcfc9bac8bcd2e7ac9875f81ea9f9005))
+
 ## v0.2.1 (2022-01-21)
 ### Fix
 * Manual release job ([`05221d5`](https://github.com/mom1/project-semantic-release/commit/05221d5aca87bcf7b325fb43823baa8a66b6cc57))
