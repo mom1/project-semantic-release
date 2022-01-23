@@ -1,5 +1,5 @@
 """Semantic Release."""
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 from .errors import UnknownCommitMessageStyleError  # noqa
 from .errors import ImproperConfigurationError, SemanticReleaseBaseError

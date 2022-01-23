@@ -1,5 +1,9 @@
 <!--next-version-placeholder-->
 
+## v1.0.1 (2022-01-23)
+### Fix
+* Added the ability to override the command to launch the Container. ([`3d59cd1`](https://github.com/mom1/project-semantic-release/commit/3d59cd10ee5736d51e6bb90403709ad960047ebb))
+
 ## v1.0.0 (2022-01-23)
 ### Feature
 * Dynaconf for manage settings ([`0c0fce9`](https://github.com/mom1/project-semantic-release/commit/0c0fce9cfcfc9bac8bcd2e7ac9875f81ea9f9005))
