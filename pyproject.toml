@@ -69,7 +69,7 @@ mock = "^4.0"
 # dev
 tox = "^3.24"
 isort = "^5.10"
-black = "^21.12b0"
+black = "^22.1"
 # mypy
 mypy = "*"
 types-requests = "*"
