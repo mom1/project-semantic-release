@@ -58,7 +58,7 @@ emoji = ["emoji"]
 [tool.poetry.dev-dependencies]
 emoji = "^1.6"
 # test
-coverage = "^6.2"
+coverage = "^6.3"
 pytest = "^6.2"
 pytest-cov = "^3.0"
 pytest-xdist = "^2.5"
