@@ -19,7 +19,7 @@ jobs:
       matrix:
         python-version: [3.7, 3.8, 3.9]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python 3.8
         uses: actions/setup-python@v2
         with:
@@ -86,7 +86,7 @@ jobs:
           python-version: 3.9
 
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install Poetry
         uses: abatilo/actions-poetry@v2.1.4
@@ -127,7 +127,7 @@ jobs:
     if: github.repository == 'mom1/project-semantic-release'
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
           ref: ${{ needs.beautify.outputs.new_sha }}
