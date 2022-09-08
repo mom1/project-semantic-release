@@ -1,5 +1,5 @@
 # This Dockerfile is only for GitHub Actions
-FROM python:3.9.10-slim-buster
+FROM python:3.9.14-slim-buster
 
 ENV PATH="$PATH:/root/.local/bin" \
   # build:
