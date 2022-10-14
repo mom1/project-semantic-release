@@ -31,7 +31,7 @@ jobs:
           poetry-version: 1.1.11
 
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3.0.11
         with:
           path: ~/.cache/pypoetry/virtualenvs
           key: ${{ runner.os }}-pip-${{ hashFiles('**/poetry.lock') }}
@@ -60,7 +60,7 @@ jobs:
           poetry-version: 1.1.11
 
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3.0.11
         with:
           path: ~/.cache/pypoetry/virtualenvs
           key: ${{ runner.os }}-pip-${{ hashFiles('**/poetry.lock') }}
@@ -93,7 +93,7 @@ jobs:
         with:
           poetry-version: 1.1.11
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3.0.11
         with:
           path: ~/.cache/pypoetry/virtualenvs
           key: ${{ runner.os }}-pip-${{ hashFiles('**/poetry.lock') }}
